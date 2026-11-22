@@ -1,0 +1,461 @@
+# Desvios permitidos do golden test — lista CONGELADA (WAVE1_FINDINGS §H).
+#
+# Congelada ANTES de qualquer comparação com um PDF gerado. Mudar este arquivo depois de ver
+# um resultado é mover a régua: exige nova `version`, novo `frozen_on` e justificativa em DEC.
+# O relatório de comparação registra o sha256 deste arquivo.
+#
+# Regras de validade (prog_g2_report.qa.compare.parse_allowances recusa o que violar):
+#   - `reference` cita UMA anomalia catalogada em data/catalog/anomalies.jsonl (campo
+#     `component`, mesmo número de relatório), OU um DEC existente em docs/decisions, OU a
+#     anomalia + o DEC que decidiu como tratá-la (v1.6);
+#   - `pending_decision: true` é recusada (v1.6): decisão pendente não é desvio permitido;
+#   - `check` pertence ao conjunto fechado do comparador e à `dimension` declarada;
+#   - `scope` explícito, sem curinga; `match` nunca vazio (nada de allowance genérica);
+#   - `expected_report_number` e `internal_consistency` nunca são permitíveis.
+#
+# Semântica de `match` (todas as chaves presentes precisam casar):
+#   kind/kinds, value/values/value_regex      item da diferença (missing/extra/order/delta)
+#   reference, generated, generated_regex     valores exatos da diferença
+#   reference_sequence, generated_sequence    sequências INTEIRAS do escopo (pinadas)
+#   max_abs_delta                             |gerado - referência| para números
+#   figure_kind, max_width_delta_cm           figuras: tipo e desvio horizontal máximo
+#   max_vertical_delta_cm                     figuras: desvio vertical máximo (v1.6)
+#   items: [{kind, block, value}]             narrative_facts: itens exatos, cada um cobre UMA
+#                                             diferença (bloco de rodovia do contexto) (v1.6)
+#   pairs: [{block, reference, generated}]    narrative_facts: o que falta e o que sobra no
+#                                             mesmo bloco e campo, emparelhados (v1.6)
+#
+# v1.9 (comparador 4.0): `text_diff` e `toc_consistency` nunca são permitíveis por
+# allowance. Hunk de texto só sai ALLOWED se estiver no conjunto de hunks aprovados
+# registrado em `approved_hunks` ({report_number, file, sha256}); o arquivo é recusado se o
+# sha256 não bater (editar hunks = nova versão destas allowances).
+# v1.10 (comparador 4.1): o hunk aprovado é POSICIONAL (bloco, parágrafo no bloco, tokens na
+# referência, bloco gerado); `--approved-hunks` no CLI também confere o sha256 registrado
+# aqui. Limitação: o sha256 não protege contra quem edita hunks e allowances juntos — a
+# integridade final é o Git e a revisão humana na certificação.
+
+version: "1.10"
+status: FROZEN
+frozen_on: "2026-10-02"
+# v1.1: ALW-14-002 passa a citar P2.4_FAIXA_RO_SEMANA_REPETIDA (o catálogo do Gate A substituiu
+#       P2.4_FAIXA_RO_INCORRETA pelas entradas das 4 rodovias, WAVE1 §D); PEND-14-001 resolvido.
+# v1.2: ALW-14-015..018, propostas pelo loop do golden (BB) e aprovadas pelo orquestrador; cada
+#       uma cita DEC ou anomalia catalogada. Nenhuma toca CONTENT.
+# v1.3 (Gate B tentativa 4, builder FF, autorizada pelo orquestrador; revisão adversarial QA-E):
+#   - ALW-14-003 sem "Tipo" (nenhuma anomalia ou DEC o sustenta): só "Manifestação", exato;
+#   - ALW-14-008, -009 e -012 removidas (não usadas no golden do main; a 012 era curinga sem
+#     limite); ALW-14-005 e -007 apertadas para ±1 (a página a mais vinha do recorte, corrigido
+#     pelo GG);
+#   - CONTENT com valores exatos: ALW-14-006 e ALW-13-005 (páginas declaradas) pinam referência
+#     e gerado; ALW-13-003 (data de assinatura, regex) removida: o golden do nº 13 transcreve a
+#     data impressa e não há diferença a permitir;
+#   - ALW-14-004 marcada `pending_decision` (antecipa decisão da Emmily);
+#   - ALW-13-014..020 da proposta do builder EE (docs/qa/proposals/golden_allowances_v1.3_n13.yaml)
+#     incorporadas; ALW-13-021 (DEC-010, ±1,15 cm) NÃO: o comparador v2.0 pareia figuras por
+#     página; PEND-13-001 e PEND-13-002 fechadas por ALW-13-014 e ALW-13-016;
+#   - ALW-14-019/-020 NÃO criadas: o comparador não tem verificação de texto por campo, e a
+#     similaridade narrativa medida com o texto novo fica acima do mínimo (ver NOTE-14-001).
+# v1.4 (builder JJ, autorizada pelo orquestrador, escopo restrito; golden do nº 14 com o
+#       comparador 2.0 sobre output/reconstruction/14_v3, 43 páginas):
+#   - congelada para o comparador 2.0: todas as allowances anteriores migradas SEM mudança de
+#     conteúdo (as verificações da v1 não mudaram de nome nem de semântica);
+#   - ALW-14-021..023: `narrative_facts` (verificação nova da v2) para as 3 anomalias JÁ
+#     catalogadas do nº 14 que o builder corrige: P2.1_IDENTIFICACAO_RODOVIA (RD-102 ->
+#     RD-102A, mesma decisão pendente da ALW-14-004), P2.4_FRASE_TRUNCADA_MEDICOES ("Na
+#     RD-101." órfã -> frase completa pela Lista Mestra) e P2.4_FAIXA_RO_SEMANA_REPETIDA
+#     (25/07 -> 01/08). Cada uma pina a seção, os tipos, os fatos exatos e as DUAS sequências
+#     inteiras de fatos da seção (referência e gerado): qualquer outra mudança no 2.1.2 ou no
+#     2.4.2 continua CRITICAL. Nenhuma toca Controle de Produtos, figuras ou estrutura;
+#   - ALW-14-005/-006/-007 sem uso no 14_v3 (43 = 43 páginas), mantidas sem mudança.
+# v1.5 (builder LL, autorizada pelo orquestrador; comparador 2.0 sobre
+#       output/reconstruction/14_v4, 43 = 43 páginas, PASS):
+#   - ALW-14-005 (page_count ±1), -006 (declared_pages 43×44) e -007 (orientation_run_length
+#     ±1 no run:3) REMOVIDAS: sem uso no 14_v3 nem no 14_v4 (o 1º recorte do Controle de
+#     Produtos na página da chamada fecha as 43 páginas). Página a mais ou a menos no nº 14
+#     volta a ser MAJOR. ALW-13-004/-005/-006 (nº 13) seguem, com justificativa própria;
+#   - nenhuma allowance nova: as diferenças do 14_v4 que vêm de textos condicionais por
+#     anomalia (pareceres do 2.4, S5/S7 do 2.1) não mudam fatos nem abrem lacuna acima do
+#     limite do comparador.
+# v1.6 (builder MM, autorizada pelo orquestrador; comparador 2.0; nº 14 sobre
+#       output/reconstruction/14_mm*, nº 13 sobre 13_mm*):
+#   - ALW-13-022..026 da proposta do LL (docs/qa/proposals/golden_allowances_v1.6_n13.yaml)
+#     incorporadas sem mudança de valores: `narrative_facts`/`narrative_coverage` de anomalias
+#     JÁ catalogadas do nº 13 que o builder corrige (P2.1_IDENTIFICACAO_RODOVIA,
+#     P2.1_RESUMO_BM_RODOVIAS, P2.4_FRASE_TRUNCADA_MEDICOES, P2.1_RESUMO_DISCIPLINAS_P22,
+#     P2.4_RCA_RODOVIA_DIVERGENTE), sequências inteiras pinadas;
+#   - ALW-13-027: ordem do P2.4_BM_EM_ELABORACAO (RD-104 antes de RD-102A só no nº 13; o modelo
+#     mantém ORDER_ALPHA), anomalia nova P2.4_BM_EM_ELABORACAO_ORDEM (FORMAT_VARIATION);
+#   - ALW-14-024: NT-734.1 com a Descrição cortada no publicado (anomalia nova
+#     CONTROLE_PRODUTOS_DESCRICAO_CORTADA); a altura de linha passa a max(27,6 pt, AutoFit)
+#     (DEC-010 §4 revista) e o gerado mostra a descrição inteira. NT-688.1 e PA-672.1 do nº 13
+#     deixam de cortar e não precisam de allowance;
+#   - NENHUMA allowance para o resíduo Lista Mestra v134 × v162 do nº 13 (limitação de fonte,
+#     GAP-015): BM-007/008/009.1 da RD-104 no 2.4, PA-640.1/PA-677.1 no índice, anexos 165 ×
+#     163 e as linhas do Controle de Produtos que vêm da versão continuam CRITICAL.
+# v1.7 (test-engineer PP, autorizada pelo orquestrador; comparador 3.0; sobre a v1.6 do MM;
+#       controle do nº 14: output/reconstruction/14_mm3 (worktree do MM); QA2-E):
+#   - congelada para o comparador 3.0 (fatos de narrativa ampliados: status, negação, ordinais,
+#     cardinais por extenso, dias da semana, executoras; parágrafos; signatário; regiões dos
+#     painéis). O parser recusa `pending_decision: true`;
+#   - ALW-14-004, ALW-14-021 e ALW-13-022 (MM): a decisão RD-102 -> RD-102A é a DEC-007 (texto gerado
+#     padronizado): flag removida, `reference: {anomaly: P2.1_IDENTIFICACAO_RODOVIA, dec: DEC-007}`;
+#   - `narrative_facts` do nº 14 pinadas por ITEM exato (`match.items`: tipo, bloco de rodovia
+#     > grupo e fato com o campo; cada item cobre uma diferença só) em vez das sequências
+#     inteiras da seção: os blocos de rodovia da v3 localizam o fato, e a sequência inteira
+#     desfazia todas as allowances da seção a cada texto legítimo novo (builders NN/QQ).
+#     ALW-14-021..023 com os mesmos fatos de antes;
+#   - ALW-14-030 e ALW-14-025..027 (narrative_facts, verificação ampliada da v3):
+#     P2.4_RELATORIO_CONSOLIDADO_GRAFIA (frase truncada completada: "a situação das não
+#     conformidades..."), P2.2_DUP_PARENTESE (predicado "encontram-se aprovados" repetido no
+#     publicado), P2.2_DUP_RD101_SEM_VALOR ("Sem informação até o fechamento...") e DEC-007
+#     (texto padronizado do 2.2 acrescenta "em 1º nível" e "encontram-se em análise");
+#   - ALW-14-029 (pedido do orquestrador após o builder QQ): P2.2_EXTERNAL_PROG_CONTRADIZ_PLANILHA,
+#     3 pares exatos (`match.pairs`: bloco, campo Análise Programa, "Não aprovado" na referência,
+#     "Em análise" no gerado) — Desapropriação da RD-104 e Interferência da RD-102A e da RD-104;
+#   - ALW-14-013 e -014 (fontes da capa, MINOR, DEC-011) REMOVIDAS: o golden do 14_mm3 continua
+#     PASS sem elas (score estrutural 0,9901). ALW-14-016, -017 e -018 FICAM: cada uma é
+#     dispensável sozinha (alw_remove.py), mas sem as três o score estrutural cai a 0,9010
+#     (< 0,95; 9 unidades de geometria em MINOR) e sem duas delas a 0,92–0,94 — juntas não são
+#     desnecessárias;
+#   - desvio VERTICAL preso em todas as allowances de geometria (medido no 14_mm3 + 0,5 cm):
+#     ALW-14-010 (recortes dos itens 2.1/2.2/2.4, 5,36 cm), ALW-14-028 (recortes do índice de
+#     anexos, separados da 010: 9,14 cm), ALW-14-016 (5,21 cm), ALW-14-017 (13,66 cm) e
+#     ALW-14-018 (2,26 cm);
+#   - entradas do MM preservadas (ALW-14-024 NT-734.1; ALW-13-022..027). As `narrative_facts`
+#     do nº 13 (ALW-13-022..027) seguem com as sequências do comparador 2.0: com o
+#     vocabulário da v3 elas não casam; repinar com o 13_mm* é do MM (pendência);
+# v1.8 (builder RR, autorizada pelo orquestrador; comparador 3.0 com extrator 3.1; nº 14 sobre
+#       output/reconstruction/14_final, nº 13 sobre 13_final):
+#   - extrator 3.1: status "aprovado com ressalva(s)" (APROVADO_COM_RESSALVA) no vocabulário e
+#     disciplinas citadas no valor dos campos do 2.2 como fato (`discipline:PAVIMENTACAO@
+#     DISCIPLINAS PENDENTES DE APROVACAO`, conjunto por campo). O comparador 3.0 passa a
+#     tratar como `order` só o fato deslocado DENTRO do mesmo bloco de rodovia (fora dele é
+#     falta + sobra, e pode virar par);
+#   - nº 14: ALW-14-031 (P2.2_APROVADOS_COM_RESSALVA_GENERALIZADO, par na RD-104), -032
+#     (P2.2_PAVIMENTACAO_RD101_STATUS_DEFASADO: texto publicado da v436), -033
+#     (P2.2_OAE_RD101_ACEITO_INCOMPLETO) e -034 (P2.4_ATAS_TEMAS_SEM_SUPORTE, parágrafo das
+#     atas sem os temas). Os 3 "Em análise" da ALW-14-029 casam como pares;
+#   - nº 13: ALW-13-022..027 repinadas para `items`/`pairs` com os valores do 13_final; novas
+#     ALW-13-028 (parágrafo do resumo do P2.2), -029 (P2.4_NC_FRASE_TRUNCADA), -030 (atas),
+#     -031/-032 (TRUE_MODEL_CHANGE "em revisão" -> "pendentes de aprovação"), -033
+#     (TRUE_MODEL_CHANGE linhas de pendentes e não entregues), -034 e -035 (DEC-007: forma
+#     padronizada e similaridade do 2.2.2), -036, -037 e -038 (OAE, ressalva e predicado
+#     repetido da RD-101);
+#   - REMOVIDAS sem uso: ALW-13-004, -005, -006, -007 (43 = 43 páginas desde o MM) e -011
+#     (capa sem desvio de bbox raster). Resíduo do nº 13 SEM allowance, de propósito: os 24
+#     CRITICAL da Lista Mestra v134 × v162 (GAP-015).
+# v1.9 (test-engineer SS, autorizada pelo orquestrador; comparador 4.0 — diff de texto estrito;
+#       nº 14 sobre output/reconstruction/14_v5, nº 13 sobre 13_v5; main 46eadfe):
+#   - congelada para o comparador 4.0: todo trecho de texto divergente (seções, CAPA, SUMARIO,
+#     títulos, células do Controle de Produtos) é hunk CRITICAL, salvo se estiver no conjunto
+#     CONGELADO de hunks aprovados registrado abaixo (`approved_hunks`, sha256 conferido);
+#   - TODAS as allowances de CONTENT da v1.8 MIGRARAM para hunks (cada hunk cita a mesma
+#     anomalia/DEC, agora no trecho exato):
+#     ALW-14-001, ALW-14-002, ALW-14-003, ALW-14-004, ALW-14-024, ALW-14-021, ALW-14-022,
+#     ALW-14-023, ALW-14-025, ALW-14-026, ALW-14-027, ALW-14-030, ALW-14-029, ALW-14-031,
+#     ALW-14-032, ALW-14-033, ALW-14-034, ALW-13-001, ALW-13-002, ALW-13-014, ALW-13-015,
+#     ALW-13-016, ALW-13-022, ALW-13-023, ALW-13-024, ALW-13-025, ALW-13-028, ALW-13-026,
+#     ALW-13-027, ALW-13-029, ALW-13-030, ALW-13-031, ALW-13-032, ALW-13-033, ALW-13-034,
+#     ALW-13-035, ALW-13-036, ALW-13-037, ALW-13-038.
+#     As verificações v3 de conteúdo seguem como diagnóstico redundante: numa unidade de texto
+#     com todos os hunks aprovados, a diferença v3 sai ALLOWED `hunks:<unidade>`;
+#   - ALW-14-031 (circular: a anomalia descrevia a própria regra de não qualificar),
+#     ALW-13-035 e ALW-13-037 SAEM sem substituto igual: a ressalva passa a ser qualificada
+#     por disciplina (DEC-015, modelo v0.13, builder TT). Os controles são os builds do main
+#     46eadfe (output/reconstruction/14_v5 e 13_v5); cada hunk da ressalva cita
+#     P2.2_APROVADOS_COM_RESSALVA_GENERALIZADO + DEC-015, um a um, com o texto exato (nº 14:
+#     11 hunks; nº 13: 13);
+#   - ficam as allowances de geometria e estrutura (VISUAL_GEOMETRY); só a ALW-14-018 muda
+#     (vertical 2,76 -> 3,33 cm: o quadro da RD-104 desce 2,83 cm com a DEC-015 no 14_v5);
+#   - nº 13 (13_v5, 44 páginas): novas ALW-13-039/-040/-041 (DEC-015, valores exatos) para a
+#     página a mais da ressalva por disciplina (o quadro da RD-104 desce para a p. 22): total,
+#     bloco retrato e páginas declaradas; sumário e Encerramento são hunks;
+#   - nº 13: o resíduo v134 × v162 NÃO é aprovado (nenhum hunk; continua CRITICAL).
+# v1.10 (test-engineer WW, autorizada pelo orquestrador; comparador 4.1 — QA4-E BLOCKS_GATE:
+#       a ressalva da DUP movida da RD-103 para a RD-102A passava):
+#   - hunks aprovados v1.1 (n14 e n13): os MESMOS hunks e justificativas da v1.0, regerados
+#     com a âncora POSICIONAL (`position`: bloco estrutural, parágrafo no bloco, tokens na
+#     referência, bloco gerado) do mesmo controle (14_v5, 13_v5); `occurrence` sai. Auditoria
+#     dos hunks repetidos: HNK-14-058/060 fixos na RD-103 e na RD-104 (Fase de Estudos;
+#     Projetos v438, linhas 31 e 83, DUP 'Aprovada com ressalva'; RD-102A, linha 7,
+#     'Aprovado'); HNK-14-025/026, HNK-13-040/042 e HNK-13-045/046 (DEC-007, mesma
+#     padronização em blocos distintos) fixos em cada bloco;
+#   - `narrative_facts` deixa de ser coberto pela unidade de texto inteira: só por hunk
+#     aprovado do mesmo bloco que explique o fato;
+#   - diferenças v3 localizáveis (fatos, códigos, rodovias, parágrafos) julgadas pelo próprio
+#     hunk: um hunk em aberto não derruba mais as outras `hunks:section:*` da seção;
+#   - hunks v1.2 sobre os controles 14_v6 e 13_v6 (modelo v0.14, agente XX): nº 14 +8
+#     (HNK-14-106..113: crase CRASE_REFERENTE_AS + DEC-007; Análise Programa com ressalva
+#     P2.2_EXTERNAL_PROG_RESSALVA_OMITIDA + DEC-015), nº 13 +2 (HNK-13-116/117, crase);
+#     HNK-13-020 cita P2.1_CLAUSULA_DISCIPLINAS_REMOVIDA (TRUE_MODEL_CHANGE, QA4-H);
+#   - nenhuma allowance muda; sha256 dos dois conjuntos recalculado abaixo.
+comparator_version: "4.1"
+
+tolerances:
+  page_count_delta: 0          # páginas: qualquer diferença é MAJOR salvo allowance
+  heading_page_shift: 1        # título até 1 página deslocado não é diferença
+  bbox_cm: 0.5                 # figura: desvio de posição/tamanho até 0,5 cm
+  structural_score_min: 0.95   # PHASES.md: fidelidade estrutural >= 95%
+  narrative_similarity_min: 0.90
+
+approved_hunks:
+  - {report_number: 14, file: docs/qa/approved_hunks/n14.yaml, sha256: "8aaf013a9ea6b252763205a124932c06ad64acf088886931a2d13be7f8e0596f"}
+  - {report_number: 13, file: docs/qa/approved_hunks/n13.yaml, sha256: "b83f21bd6d74ce9d992db004d92199a0b6bcab490baf4733c57d78d72081c6ff"}
+
+allowances:
+  # ------------------------------------------------- Relatório G2 nº 14 — Agosto/2026
+  # (geometria e estrutura; o CONTENT da v1.8 migrou para docs/qa/approved_hunks/n14.yaml)
+
+  - id: ALW-14-010
+    report_number: 14
+    reference: {dec: DEC-010}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: [anchor:2.1.2, anchor:2.2.2, anchor:2.4.2]
+    match: {figure_kind: vector, max_width_delta_cm: 0.5, max_vertical_delta_cm: 5.86}
+    rationale: >-
+      Altura e posição vertical dos recortes do Controle de Produtos dos itens mudam com a
+      paginação gulosa (WAVE1_FINDINGS §A). Largura e posição horizontal presas a 0,5 cm (17,5 cm
+      de largura útil); vertical presa ao medido no 14_mm3 (5,36 cm, recorte #1 do 2.4.2) + 0,5.
+      Os recortes do índice de anexos ficam na ALW-14-028.
+
+  - id: ALW-14-011
+    report_number: 14
+    reference: {dec: DEC-011}
+    dimension: VISUAL_GEOMETRY
+    check: figure_count
+    scope: anchor:CAPA
+    match: {figure_kind: raster, max_abs_delta: 2}
+    rationale: >-
+      Capa histórica = prévia EMF de slide OLE (3 rasters no PDF); a gerada é fundo sem texto
+      + textos do Word (DEC-011).
+
+  - id: ALW-14-015
+    report_number: 14
+    reference: {dec: DEC-014}
+    dimension: VISUAL_GEOMETRY
+    check: figure_count
+    scope: anchor:ENCERRAMENTO
+    match: {figure_kind: raster, reference: 1, generated: 0}
+    rationale: >-
+      A imagem após o ENCERRAMENTO é a aparência da assinatura digital do PDF (campo
+      Signature1), aplicada por quem assina depois do builder (DEC-014).
+
+  - id: ALW-14-016
+    report_number: 14
+    reference: {anomaly: INDICE_ANEXOS_RECORTE_ENCOLHIDO}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: anchor:ANEXOS
+    match: {figure_kind: vector, values: ["ANEXOS#1", "ANEXOS#3"], max_vertical_delta_cm: 5.71}
+    rationale: >-
+      Dois recortes do índice de anexos foram encolhidos à mão no nº 14 (16,76 e 16,68 cm);
+      o gerado usa a largura útil de 17,5 cm (DEC-010). Vertical presa ao medido no 14_mm3
+      (5,21 cm no ANEXOS#3) + 0,5 (v1.7).
+
+  - id: ALW-14-017
+    report_number: 14
+    reference: {dec: DEC-009}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: anchor:2.4.2
+    match: {figure_kind: raster, max_width_delta_cm: 0.5, max_vertical_delta_cm: 14.16}
+    rationale: >-
+      O painel de índices ambientais mostra a tabela completa (33 licenças, 17,3 cm de altura)
+      em vez da janela de rolagem capturada (9,84 cm); os painéis seguintes descem. Largura
+      e posição horizontal presas a 0,5 cm; vertical ao medido no 14_mm3 (13,66 cm) + 0,5 (v1.7).
+
+  - id: ALW-14-018
+    report_number: 14
+    reference: {dec: DEC-007}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: anchor:2.2.2
+    match: {figure_kind: raster, max_width_delta_cm: 0.5, max_vertical_delta_cm: 3.33}
+    rationale: >-
+      O texto padronizado do 2.2 (DEC-007) é mais longo que o editado à mão; os quadros por
+      rodovia descem 0,56 a 2,26 cm no 14_mm3. Largura e posição horizontal presas a 0,5 cm;
+      vertical ao medido + 0,5 (v1.7). v1.9: com as frases da ressalva por disciplina
+      (DEC-015) o quadro da RD-104 desce 2,83 cm no 14_v5; vertical repinada a 2,83 + 0,5.
+
+  - id: ALW-14-028
+    report_number: 14
+    reference: {dec: DEC-010}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: anchor:ANEXOS
+    match: {figure_kind: vector, max_width_delta_cm: 0.5, max_vertical_delta_cm: 9.65}
+    rationale: >-
+      Recortes do índice de anexos: a paginação gulosa (DEC-010 §3) desloca os recortes
+      seguintes ao 1º encolhido à mão (medido no 14_mm3: 9,14 cm, ANEXOS#5; + 0,5). Largura e
+      posição horizontal presas a 0,5 cm: os dois recortes encolhidos à mão (16,76 e 16,68 cm)
+      são da ALW-14-016.
+
+  # ------------------------------------------------- Relatório G2 nº 13 — Julho/2026
+  # (geometria e estrutura; o CONTENT da v1.8 migrou para docs/qa/approved_hunks/n13.yaml)
+
+  - id: ALW-13-008
+    report_number: 13
+    reference: {dec: DEC-010}
+    dimension: VISUAL_GEOMETRY
+    check: figure_count
+    scope: [anchor:2.1.2, anchor:2.2.2, anchor:2.4.2, anchor:ANEXOS]
+    match: {figure_kind: vector, max_abs_delta: 3}
+    rationale: >-
+      Ver ALW-14-009. No nº 13 a altura de linha variava (DEC-010 §4), o que também muda o
+      número de recortes.
+
+  - id: ALW-13-009
+    report_number: 13
+    reference: {dec: DEC-010}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: [anchor:2.1.2, anchor:2.2.2, anchor:2.4.2, anchor:ANEXOS]
+    match: {figure_kind: vector, max_width_delta_cm: 0.5}
+    rationale: Ver ALW-14-010; altura de linha uniforme 27,6 pt no gerado (DEC-010 §4).
+
+  - id: ALW-13-010
+    report_number: 13
+    reference: {dec: DEC-011}
+    dimension: VISUAL_GEOMETRY
+    check: figure_count
+    scope: anchor:CAPA
+    match: {figure_kind: raster, max_abs_delta: 2}
+    rationale: Ver ALW-14-011.
+
+  - id: ALW-13-012
+    report_number: 13
+    reference: {dec: DEC-011}
+    dimension: VISUAL_GEOMETRY
+    check: cover_fonts
+    scope: cover
+    match: {kind: missing, value: ArialMT}
+    rationale: >-
+      Fonte substituta da data da capa no nº 13 ("11de Agosto", §I); o gerado usa a fonte do
+      tema (DEC-011).
+
+  - id: ALW-13-013
+    report_number: 13
+    reference: {dec: DEC-011}
+    dimension: VISUAL_GEOMETRY
+    check: cover_fonts
+    scope: cover
+    match: {kind: extra, value_regex: "Arial ?Nova ?Cond[ ,-]?Light.*"}
+    rationale: Ver ALW-14-014.
+
+  - id: ALW-13-017
+    report_number: 13
+    reference: {dec: DEC-014}
+    dimension: VISUAL_GEOMETRY
+    check: figure_count
+    scope: anchor:ENCERRAMENTO
+    match: {figure_kind: raster, reference: 1, generated: 0}
+    rationale: Aparência da assinatura digital, aplicada depois do builder (ver ALW-14-015).
+
+  - id: ALW-13-018
+    report_number: 13
+    reference: {dec: DEC-007}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: anchor:2.2.2
+    match: {figure_kind: raster, max_width_delta_cm: 0.5}
+    rationale: >-
+      Texto padronizado do 2.2 (DEC-007) traz "pendentes de aprovação"/"não entregues" que o
+      nº 13 omitia; os quadros descem 1,7–6,2 cm (ver ALW-14-018). Horizontal preso a 0,5 cm.
+
+  - id: ALW-13-019
+    report_number: 13
+    reference: {dec: DEC-009}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: anchor:2.4.2
+    match: {figure_kind: raster, max_width_delta_cm: 0.5}
+    rationale: Painel de índices ambientais com a tabela completa (ver ALW-14-017).
+
+  - id: ALW-13-020
+    report_number: 13
+    reference: {anomaly: INDICE_ANEXOS_RECORTE_ENCOLHIDO}
+    dimension: VISUAL_GEOMETRY
+    check: figure_bbox
+    scope: anchor:ANEXOS
+    match: {figure_kind: vector, values: ["ANEXOS#1", "ANEXOS#2", "ANEXOS#3", "ANEXOS#4"]}
+    rationale: >-
+      1º recorte do índice encolhido à mão para 16,57 cm no nº 13 (4 agrupamentos vetoriais da
+      p. 38); o gerado usa 17,5 cm (DEC-010).
+
+  # ------------------------------------------------- nº 13, v1.9: paginação da DEC-015
+  # 13_v5 (main 46eadfe) tem 44 páginas: as frases da ressalva por disciplina alongam o 2.2.2,
+  # o quadro da RD-104 (9,8 cm) não cabe no fim da p. 21 (texto até 18,3 cm) e desce para a
+  # p. 22; o Controle de Produtos do 2.2 passa a 23-24 e do 2.3 em diante tudo desce uma página.
+  # Só o 2.2.2 mudou entre o 13_final (43 págs.) e o 13_v5. Valores exatos; as páginas do
+  # sumário e o "44 (quarenta e quatro) páginas" do Encerramento são hunks (DEC-015).
+  - id: ALW-13-039
+    report_number: 13
+    reference: {dec: DEC-015}
+    dimension: STRUCTURAL
+    check: page_count
+    scope: document
+    match: {kind: delta, reference: 43, generated: 44}
+    rationale: >-
+      Uma página a mais pela paginação do texto da ressalva por disciplina (DEC-015); qualquer
+      outro total continua MAJOR.
+
+  - id: ALW-13-040
+    report_number: 13
+    reference: {dec: DEC-015}
+    dimension: STRUCTURAL
+    check: orientation_run_length
+    scope: run:3
+    match: {kind: delta, reference: 29, generated: 30}
+    rationale: >-
+      O bloco retrato do 2.1 ao Encerramento ganha a página da ALW-13-039; os blocos de
+      paisagem não mudam.
+
+  - id: ALW-13-041
+    report_number: 13
+    reference: {dec: DEC-015}
+    dimension: CONTENT
+    check: declared_pages
+    scope: closing
+    match: {kind: delta, reference: 43, generated: 44}
+    rationale: >-
+      O Encerramento declara as 44 páginas que o gerado tem (internal_consistency, nunca
+      permitível, confere). Não é coberta pelos hunks: o parágrafo do Encerramento também tem
+      o resíduo v134 × v162 (165 × 163 anexos), que fica CRITICAL.
+
+# Desvios conhecidos SEM allowance ativa: falta a anomalia catalogada que a autorize. Enquanto
+# estiverem aqui, o comparador REPROVA se o gerado divergir — de propósito. Para ativar:
+# registrar a anomalia em data/catalog/anomalies.jsonl (scripts/08) e congelar nova versão.
+pending:
+  # PEND-13-001 e PEND-13-002 fechadas na v1.3 (ALW-13-014 e ALW-13-016).
+  - id: NOTE-13-001
+    report_number: 13
+    description: >-
+      NÃO é desvio: "3 BM RD-104 duplicadas no 2.4 / 3 BM RD-102A omitidas nos anexos" (§A).
+      A extração independente lê, por (código, rodovia), BM-007.1–009.1 uma vez em cada uma
+      das 4 rodovias no 2.4 (111 linhas) e o índice de anexos sem as 6 linhas de RD-102A e
+      RD-104 (165 linhas) — exatamente body_rows x index_rows da DEC-012 §3. O gerado tem de
+      reproduzir isso; não há allowance.
+    evidence: docs/decisions/DEC-012-snapshot-by-publication-instant.md §3
+  - id: NOTE-14-001
+    report_number: 14
+    description: >-
+      NÃO é allowance: diferenças de TEXTO do nº 14 que o gerado tem de ter, por regra, e que o
+      comparador 1.0 só mede pela similaridade narrativa da seção (sem verificação por campo):
+      P2.2_DUP_RD101_SEM_VALOR (entrada humana com o sentinela {null_reason} ->
+      "Publicação pela Casa Civil: Sem informação até o fechamento do presente relatório;");
+      P2.1_RESUMO_BM_CONCORDANCIA ("referentes à RD-104" + detalhe por rodovia);
+      P2.1_S7_TEMAS_SEM_SUPORTE e P2.4_PARECERES_MEDICAO_ATESTE_SEM_PA /
+      P2.4_PARECERES_AMB_TEMAS_SEM_SUPORTE (temas sem PA não citados);
+      P2.2_PAVIMENTACAO_RD101_STATUS_DEFASADO (texto do 2.2 da v438, snapshot único DEC-012).
+      Medido sobre o PDF do main (14_main) com as edições aplicadas: 2.1.2 0,9875 -> 0,9706;
+      2.2.2 0,9416 -> 0,9337; 2.4.2 0,9829 -> 0,9729 (mínimo 0,90). Rodovias e códigos citados
+      não mudam. Se o comparador v2.0 passar a comparar texto por campo, cada uma vira
+      allowance de escopo mínimo citando a sua anomalia. v1.6 (comparador 3.0, status e
+      negação qualificados pelo campo): P2.2_DUP_RD101_SEM_VALOR virou a ALW-14-026; as demais
+      não mudam fato do vocabulário da v3 nem deixam parágrafo sem correspondente. v1.8
+      (extrator 3.1, disciplinas dos campos do 2.2 como fato): P2.2_PAVIMENTACAO_RD101_STATUS_
+      DEFASADO virou a ALW-14-032; o parágrafo das atas (P2.4_ATAS_TEMAS_SEM_SUPORTE), a
+      ALW-14-034. v1.9 (comparador 4.0, diff de texto estrito): todas são hunks exatos em
+      docs/qa/approved_hunks/n14.yaml, cada um com a sua anomalia ou DEC.
+    evidence: data/catalog/anomalies.jsonl; scripts/08_record_anomalies.py

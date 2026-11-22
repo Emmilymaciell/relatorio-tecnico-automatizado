@@ -1,0 +1,88 @@
+# ==============================================================
+# SEGREDOS E CREDENCIAIS — nunca versionar
+# ==============================================================
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.pem
+*.key
+*.cer.private
+*.crt.private
+*.jks
+*.keystore
+secrets/
+credentials/
+*token*.json
+*secret*.json
+
+# ==============================================================
+# DOCUMENTOS CORPORATIVOS BRUTOS — o SharePoint e fonte, nao o repo
+# ==============================================================
+# Downloads temporarios autorizados ficam em tmp/ e sao apagados.
+/tmp/*
+!/tmp/.gitkeep
+/scratch/
+/examples/raw/
+/assets/discovered/raw/
+*.docx
+*.xlsx
+*.xlsm
+*.pptx
+*.pdf
+# Excecao: assets estaticos pequenos e aprovados (logos, brasoes) em assets/branding
+!/assets/branding/**
+# Excecao: fixtures sinteticas de teste (nunca documentos reais)
+!/tests/fixtures/**
+
+# ==============================================================
+# SAIDAS GERADAS
+# ==============================================================
+/output/**
+!/output/.gitkeep
+/logs/**
+!/logs/.gitkeep
+*.log
+/data/derived/**/*.png
+/data/derived/**/*.jpg
+/data/derived/**/*.jpeg
+/data/derived/**/*.emf
+/data/derived/**/*.wmf
+/data/derived/**/*.bin
+/data/derived/**/*.zip
+*.zip
+
+# ==============================================================
+# PYTHON
+# ==============================================================
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# ==============================================================
+# OFFICE / WINDOWS / ONEDRIVE
+# ==============================================================
+~$*
+*.tmp
+.~lock.*
+Thumbs.db
+desktop.ini
+.DS_Store
+~WRL*.tmp
+
+# ==============================================================
+# CLAUDE CODE (estado local de sessao)
+# ==============================================================
+.claude/settings.local.json
+
+# worktrees de subagentes (Claude Code)
+/.claude/worktrees/

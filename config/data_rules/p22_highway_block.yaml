@@ -1,0 +1,340 @@
+# Especificação implementável — P2.2_HIGHWAY_BLOCK (texto por rodovia + quadro visual por rodovia)
+# Autor: agente N (read-only). Data: 2026-10-01. Gerado à mão a partir dos scripts n01–n18 em tmp/agent_N/.
+# Padrão de referência: Relatório G2 nº 14 — Agosto/2026; conferido contra o nº 13 — Julho/2026.
+meta:
+  component: P2.2_HIGHWAY_BLOCK
+  status: CANDIDATE
+  sources:
+    projetos_executivo:
+      file: "03 - Acompanhamento de Projetos Executivo.xlsx"
+      ref: "b!EXEMPLO-DRIVE-ID:01EXEMPLOITEMID000000000000000000"
+      sheets_used: [Projetos, GED, Painel de Controle]
+      read_policy: "todas as linhas, ignorando autofiltro e linhas ocultas (DEC-009 item 3); a aba Projetos tem autofiltro A1:V101 e 74 linhas ocultas na cópia local"
+      header_row: 1
+      header_stability: "cabeçalho idêntico (24 colunas A:X) nas 128 versões lidas (v290 a v442)"
+    lista_mestra:
+      use: "nenhum uso no bloco por rodovia (a Lista Mestra não tem status de disciplina)"
+  snapshots_used:
+    no14_text_best_fit: {version: "436.0", lastModified: "2026-09-04T19:51:45Z"}
+    no14_quadro: {version: "438.0", lastModified: "2026-09-04T19:53:50Z", note: "agente E: v437 a v439 = 100% das células dos 4 quadros"}
+    no13_quadro_and_text: {version: "328.0", lastModified: "2026-08-13T16:12:40Z"}
+    current_local_copy: "tmp/downloads/fontes_de_trabalho/03 - acompanhamento de projetos executivo.xlsx (HOJE=2026-09-22)"
+  evidence_scripts:
+    - tmp/agent_N/n03_extract_versions.py
+    - tmp/agent_N/n07_fetch_range.py
+    - tmp/agent_N/n08_rules.py
+    - tmp/agent_N/n11_variants.py
+    - tmp/agent_N/n15_render.py
+    - tmp/agent_N/n16_measure.py
+    - tmp/agent_N/n17_ged_first.py
+    - tmp/agent_N/n18_ged_month.py
+  read_only_note: "versões lidas só em memória via GraphReadOnlyClient.read_version_bytes; gravado apenas extrato derivado (projetos_range.json, projetos_versions.json)"
+
+inputs:
+  report_number: int
+  projetos_snapshot: "versão da planilha usada no texto (regra de escolha de snapshot: DEC-012 — CreationDate do PDF; golden test v328 julho / v438 agosto, WAVE1 §E)"
+  status_reference_date:
+    meaning: "data de referência explícita do status; impressa no quadro como 'Atualizado em'"
+    no14: "2026-09-07"
+    no13: "2026-08-13"
+    class: MANUAL_INPUT
+    note: "necessária para 'pendentes de aprovação' (coluna W) e para recalcular 'Atrasado' (Projetos!H usa TODAY())"
+
+normalization:
+  road:
+    rule: "remover espaços e NBSP de Obra e pôr em maiúsculas: 'RD-102 A' vira 'RD-102A'; RD-103, RD-101, RD-104 inalteradas"
+    same_as_sheet_formula: "Projetos!V faz SUBSTITUTE(TRIM(SUBSTITUTE(B,CHAR(160),' ')),' ','') para casar com o GED"
+    display: "RD-102A (Painel de Controle!I4 'RD-102A - CLX / TRAFEX', Lista Mestra e relatório)"
+    warn: "GED tem 2 linhas com RODOVIA 'RD-103-0': não normalizar para RD-103; anomalia de fonte"
+  text_fields: "NFC, trim, colapsar espaços, comparar em minúsculas"
+  acceptance: "Disciplina ACEITA? em minúsculas e sem espaços: 'sim' (aparecem 'Sim', 'sim', 'SIm', 'Sim ') ou 'não' ou vazio"
+  evaluation_domain_observed: ["", aprovado, reprovado, aprovado com ressalva, aprovada com ressalva, aprovado com ressalvas, aprovada, parecer emitido, disciplina não aceita, em análise]
+  situation_domain_observed: [analisada, atrasado, em análise, aguardando início da análise]
+  situation_formula: "Projetos!I: Previsão vazia = 'Aguardando previsão'; S preenchido = 'Analisada'; L preenchido = 'Em análise'; G preenchido = 'Aguardando início da análise'; H contém ATRASADO = 'Atrasado'; H contém Faltam = 'No prazo'. H depende de TODAY(): recalcular Atrasado/No prazo com status_reference_date, nunca usar o cache."
+
+exclusions:
+  text:
+    by_prefix_of_discipline: ["Equipe Fixa de Projeto de Engenharia", "Projeto Executivo", "Memoriais Descritivos da Obra"]
+    evidence: "nº 14: Memoriais Descritivos da Obra está 'Atrasado' nas 4 rodovias e nunca aparece em 'não entregues' (4 de 4); nº 13 RD-103 idem. Equipe Fixa (3 por rodovia) e Projeto Executivo (3.10) nunca aparecem."
+    confidence: CONFIRMED
+    note: "a exclusão de Memoriais Descritivos é editorial (nenhuma coluna a marca)"
+  quadro:
+    by_prefix_of_discipline: ["Equipe Fixa de Projeto de Engenharia", "Projeto Executivo"]
+    evidence: "quadros nº 13 e nº 14: 22 linhas em RD-103 e RD-101, 20 em RD-102A e RD-104; Memoriais Descritivos incluído"
+    equivalent_filter: "Resumo Disciplina (X) não vazio dá o mesmo conjunto hoje; não usar como regra (coluna manual)"
+    confidence: CONFIRMED
+
+road_order:
+  value: [RD-103, RD-102A, RD-101, RD-104]
+  source: "Painel de Controle, ordem dos grupos de colunas F:H, I:K, L:N, O:Q (linha 4)"
+  counter_checked: "não é a ordem física de Projetos (RD-102 A primeiro), nem SRE Trechos (RD-103, RD-102 A, RD-104, RD-101), nem a alfabética do resumo executivo e da aba Listas"
+  confidence: HIGH
+
+group_order:
+  rule: "grupos presentes na rodovia, ordenados pela data da PRIMEIRA entrega no GED (mínimo de GED!H 'Data de Recebimento' por RODOVIA normalizada e 'FASE E/OU EVENTO'); grupos sem entrega vão ao fim; empate e sem entrega pela ordem maior de 'Ordem Disciplina' (1 Estudos, 2 Principal, 3 Secundário, 4 OAE)"
+  first_delivery_current_ged:
+    RD-103: {Fase de Estudos: 2025-12-29, Viário Principal: 2026-02-25, OAE: 2026-06-15, Viário Secundário: 2026-07-06}
+    RD-101: {Fase de Estudos: 2026-01-08, Viário Principal: 2026-04-07, Viário Secundário: 2026-05-25, OAE: 2026-06-05}
+    RD-102A: {Fase de Estudos: 2025-11-04, Viário Principal: 2025-11-04, Viário Secundário: 2025-12-19}
+    RD-104: {Fase de Estudos: 2025-12-22, Viário Principal: 2026-04-17, Viário Secundário: 2026-05-25}
+  explains:
+    - "RD-103 maio (nº 11): Secundário e OAE sem entrega, ordem padrão (Secundário, OAE) = observado"
+    - "RD-103 junho (nº 12): OAE entregue em 15/06, Secundário ainda não; OAE antes = observado (é a troca de junho)"
+    - "RD-103 julho e agosto: 15/06 antes de 06/07, OAE antes do Secundário = observado"
+    - "RD-101: Secundário 25/05 antes de OAE 05/06, Secundário antes nos 4 meses = observado"
+    - "RD-102A e RD-104: Estudos, Principal, Secundário = observado"
+  score: "16 de 16 (4 rodovias x 4 meses)"
+  mechanism: "copy-forward: a seção do grupo é acrescentada ao fim do bloco quando o grupo recebe a primeira entrega"
+  rejected_alternatives:
+    - "Projetos 'Ordem Disciplina' (OAE = 4.x): erra RD-103 nº 12 a 14 (3 casos)"
+    - "Painel de Controle ID (OAE = 13 e 14, antes do Secundário = 15 a 22): erra RD-101 nos 4 meses e RD-103 em maio (5 casos)"
+  confidence: HIGH
+  decision_needed: "reproduzir (regra acima) ou padronizar na ordem da lista fixa P2.2_GRUPOS_LIST (Estudos, Principal, Secundário, OAE). Default técnico: regra da primeira entrega (reproduz 16 de 16)."
+
+discipline_order_in_lines:
+  rule: "Ordem Disciplina numérica (major, minor), nunca como texto ('3.10' depois de '3.9')"
+  score_no14: "39 de 42 linhas com lista e conjunto correto"
+  exceptions: "RD-102A Secundário aceitação e aprovação; RD-104 Secundário aceitação: herança do nº 13 com inserção do item novo (copy-forward), não regra"
+  confidence: HIGH
+
+status_sets:
+  universe: "D = linhas de Projetos com road(Obra) == R, GRUPO == G e disciplina não excluída, ordenadas por Ordem Disciplina"
+  accepted: "acc == 'sim'"
+  approved: "aval começa com 'aprovad' (inclui 'com ressalva(s)' e 'Aprovada')"
+  in_analysis: "sit == 'em análise' (Projetos!I recalculado)"
+  pending_approval:
+    rule: "acc == 'sim' E aval == 'reprovado' E (W 'Entrega da Revisão' começa com 'Aguardando' OU W é data menor ou igual a status_reference_date)"
+    meaning: "reprovado sem reentrega agendada ou com reentrega vencida; reprovado com reentrega futura não entra"
+    evidence: "nº 14 contra v436: 7 de 7 incluídos e 8 de 8 excluídos (RD-103 Secundário 4, RD-102A Paisagismo e RD-104 Paisagismo com W futura entre 08 e 25/09; RD-101 OAE com W 'Em Análise'). Sem a condição sobre W a regra cria 4 linhas que o relatório não tem."
+    parameter_window: "qualquer referência entre 2026-09-04 e 2026-09-07 (ou W anterior à emissão, 2026-09-08) dá o mesmo resultado"
+    confidence: MEDIUM
+    confidence_reason: "um mês, regra com um parâmetro, W é coluna digitada à mão"
+    history: "nº 12 e 13 usavam 'Disciplinas em revisão: ... em revisão pela empresa executora' (1 ocorrência no nº 13, mesma condição); rótulo trocado em agosto (TRUE_CHANGE)"
+  not_delivered: "sit == 'atrasado' (sem Data de Recebimento). O caso 'No prazo' sem entrega nunca ocorreu: UNKNOWN se entra"
+  unhandled_values: "sit 'aguardando início da análise' (versões antigas) e aval 'parecer emitido', 'disciplina não aceita', 'em análise' não são aprovadas nem pendentes; verbalização UNKNOWN (não ocorrem no nº 13 nem no nº 14)"
+
+line_presence:
+  road_heading: always
+  dashboard_image: "sempre, 1 por rodovia, logo após o título (desde o nº 13)"
+  group_heading: "grupo presente se D não vazio (OAE só em RD-103 e RD-101)"
+  acceptance: always
+  approval: always
+  in_analysis: "omitida se approved == D (grupo todo aprovado); senão sempre, mesmo vazia"
+  in_analysis_evidence: "nº 13 e nº 14: 30 grupos, 0 contraexemplos (omitida em 5 + 5 grupos todos aprovados)"
+  pending_approval: "só se não vazia (padrão de agosto)"
+  not_delivered: "só se não vazia (agosto: 4 de 4 rodovias; julho: só RD-103, julho incompleto)"
+  confidence: {in_analysis: HIGH, pending_approval: MEDIUM, not_delivered: HIGH}
+
+templates:
+  class: GENERATED_STANDARDIZED_TEXT
+  policy: "DEC-007: corrigir e padronizar; o golden test aceita a diferença"
+  road_heading:
+    text: "Referente ao acompanhamento de projeto executivo da Rodovia {road}:"
+    runs: [{text: "Referente ao acompanhamento de projeto executivo da "}, {text: "Rodovia {road}", bold: true}, {text: ":"}]
+    style: Normal
+    preceded_by: "parágrafo vazio"
+    confidence: CONFIRMED
+  group_heading:
+    style: "PargrafodaLista, numId 37 lvl 0"
+    forms: {EST: "Disciplinas da Fase de Estudos:", PRI: "Disciplinas do Viário Principal:", SEC: "Disciplinas do Viário Secundário:", OAE: "Obras de Arte Especiais (OAE):"}
+  status_line:
+    style: "PargrafodaLista, numId 37 lvl 1"
+    bold: none
+    punctuation: "ponto e vírgula em todas as linhas; ponto final na última linha do bloco da rodovia (padronização; o histórico mistura)"
+    enumeration: "'A', 'A e B', 'A, B e C' (sem vírgula antes do 'e')"
+    article_table: {Estudos: os, Memoriais: os, Documentação: a, Relatório: o, Diagnóstico: o, Projeto: o, Orçamento: o, Cronograma: o}
+    display_name: "nome da planilha (Disciplina, trim). O histórico usa formas curtas em 3 casos ('Estudos Geotécnicos', 'Projeto de Drenagem', 'Projeto Geométrico'): decisão; default = nome da planilha"
+  acceptance:
+    universal: "Aceitação: todas as disciplinas {da Fase de Estudos | do Viário Principal | do Viário Secundário} encontram-se aceitas em 1º nível;"
+    universal_condition: "accepted == D e grupo diferente de OAE (OAE com tudo aceito é enumerada: RD-103 nº 13 e nº 14)"
+    plural: "Aceitação: encontram-se aceitos em 1º nível {enum_com_artigo};"
+    singular: "Aceitação: {artigo} {disciplina} encontra-se {aceito | aceita | aceitos} em 1º nível;"
+    empty: "Aceitação: nenhuma disciplina dessa fase se encontra aceita em 1º nível no fechamento do presente relatório;"
+    empty_note: "NÃO OBSERVADO no nº 13 nem no nº 14; criado por analogia com a aprovação"
+    observed_variants_no14:
+      "foram aceitas (universal)": 3
+      "encontram-se aceitas (universal)": 5
+      "encontram-se aceitos em 1º nível o ... (lista, verbo antes)": 3
+      "... encontram-se aceitos em 1º nível (lista, sujeito antes)": 1
+      "... encontram-se aceitas pelo Programa": 1
+      "... se encontra aceito": 1
+  approval:
+    universal: "Aprovação: Todas as disciplinas encontram-se aprovadas;"
+    universal_note: "'Todas' com maiúscula em 7 de 7 (nº 14) e 7 de 7 (nº 13); J propõe minúscula: decisão DEC-007"
+    universal_condition: "approved == D e grupo diferente de OAE"
+    plural: "Aprovação: {enum_com_artigo} encontram-se aprovados;"
+    singular: "Aprovação: {artigo} {disciplina} encontra-se {aprovado | aprovada};"
+    empty: "Aprovação: nenhuma disciplina dessa fase se encontra aprovada no fechamento do presente relatório;"
+    # DEC-015 (modelo v0.13): a ressalva é FATO da planilha, qualificada por disciplina.
+    reservation_qualifier:
+      value: per_discipline          # per_discipline | none (none = forma do modelo v0.12)
+      marker: ressalva               # Status (AVALIAÇÃO) normalizado começa com 'aprovad' e contém o marcador
+      sentence_separator: ". "
+      rule: >-
+        o conjunto approved (status_sets.approved) se divide em aprovadas e aprovadas com
+        ressalva (Projetos!S 'Aprovado com ressalva', 'Aprovada com ressalva', 'Aprovado com
+        ressalvas', 'Aprovado com Ressalvas'). Sem ressalva no grupo: as formas acima, sem
+        mudança. Com ressalva: primeiro as aprovadas (universal, plural ou singular acima),
+        depois, em nova frase com inicial maiúscula, as com ressalva (with_reservation.plural ou
+        .singular, sem o rótulo). Só com ressalva: with_reservation.plural ou .singular. Grupo
+        todo aprovado e todo com ressalva (fora da OAE): with_reservation.universal.
+      evidence: >-
+        nº 12 (Junho/2026), 6 de 6 linhas de Aprovação com aprovadas com ressalva: a ressalva
+        vem por disciplina, em frase própria (RD-103, RD-102A, RD-101 e RD-104 Fase de Estudos,
+        4 de 4 com as aprovadas antes: 'encontram-se aprovados o ... . Os ... encontram-se
+        aprovados com ressalva'; RD-104 Viário Principal: '... encontram-se aprovados com
+        ressalva'; RD-104 Viário Secundário: '... encontra-se aprovado com ressalva');
+        qualificador 'com ressalva' no singular em 6 de 6 (mais 2 'aprovados parcialmente com
+        ressalvas', Estudos Geotécnicos). nº 11 (Maio/2026): 1 ocorrência, também por
+        disciplina ('o qual se encontra aprovado parcialmente com ressalvas', RD-102A). Planilha:
+        Projetos!S distingue a ressalva por disciplina nas 128 versões lidas (v290 a v442); v438
+        = 10 disciplinas com ressalva nas 4 rodovias, v328 = 13. Não há snapshot da planilha do
+        nº 11 nem do nº 12 (a 1ª versão lida é de 06/08/2026): a forma é medida no texto, o fato
+        na planilha.
+      conflict: >-
+        nº 13 e nº 14 generalizam: uma só frase com ressalva, igual nos dois meses e aplicada
+        também ao Geométrico da RD-104, que é 'Aprovado' na v328 e na v438; as demais aprovações
+        com ressalva saem sem o qualificador, inclusive sob 'Todas as disciplinas encontram-se
+        aprovadas'. Anomalia P2.2_APROVADOS_COM_RESSALVA_GENERALIZADO (não é regra).
+      universal_with_reservation: >-
+        grupo todo aprovado com parte das disciplinas com ressalva: universal acima + frase das
+        com ressalva (padrão vigente para o grupo todo aprovado: 4 ocorrências no nº 13 e 5 no
+        nº 14, mais a frase de ressalva do nº 12). O nº 12 enumerava as aprovadas (RD-102A Fase de Estudos, 8 de 8):
+        alternativa registrada em DEC-015 para revisão da Emmily.
+      not_observed: "'aprovado parcialmente com ressalvas' (nº 11 e nº 12, Estudos Geotécnicos) não é valor de Projetos!S em nenhuma versão lida: não reproduzido"
+      confidence: HIGH
+      decision: DEC-015
+    with_reservation:
+      universal: "Aprovação: Todas as disciplinas encontram-se aprovadas com ressalva;"
+      plural: "Aprovação: {enum_com_artigo} encontram-se aprovados com ressalva;"
+      singular: "Aprovação: {artigo} {disciplina} encontra-se {aprovado | aprovada} com ressalva;"
+      universal_note: "NÃO OBSERVADO (nenhum grupo todo com ressalva na janela); por analogia com approval.universal"
+  in_analysis:
+    plural: "Disciplinas em análise: {enum_com_artigo} encontram-se em análise pelo Programa;"
+    singular: "Disciplinas em análise: {artigo} {disciplina} encontra-se em análise pelo Programa;"
+    empty: "Disciplinas em análise: nenhuma disciplina encontra-se em análise no fechamento do presente relatório;"
+    empty_ref: "tmp/agent_J/content_model.yaml, chave p22_empty_set_verbalization (4 formas no nº 14; canônica = a mais frequente, 16 de 22)"
+  pending_approval:
+    any: "Disciplinas pendentes de aprovação: {enum_sem_artigo};"
+    confidence: CONFIRMED
+    evidence: "4 de 4 formas idênticas no nº 14"
+  not_delivered:
+    plural: "Disciplinas não entregues: ainda não foram entregues {enum_com_artigo}."
+    singular: "Disciplinas não entregues: ainda não foi entregue {artigo} {disciplina}."
+    note: "nº 13 RD-103 tem artigo em todos os itens; nº 14 RD-101 omite o do meio: padronizar com artigo em todos"
+  dates_in_text: "nenhuma data no texto do bloco"
+
+quadro_visual:
+  class: RECONSTRUCTED_VISUAL
+  policy: "DEC-009: reconstruir a partir do dado; não reproduzir a captura do Power BI"
+  placement: "inline, logo após o título da rodovia, 17,50 cm de largura (6301105 EMU), altura de 9,78 a 9,84 cm no nº 14"
+  filter: "road(Obra) == rodovia; excluir exclusions.quadro; todas as linhas (ignorar ocultação)"
+  row_order: "Ordem Disciplina numérica (major, minor); OAE (4.x) por último. NÃO é a ordem dos grupos do texto"
+  columns:
+    - {header: Disciplina, source: "Projetos!D (trim)", align: left, wrap: true}
+    - {header: "Previsão", source: "Projetos!E Previsão de Entrega", format: "dd/mm/aa"}
+    - {header: Entrega, source: "Projetos!G Data de Recebimento", format: "dd/mm/aa", empty: ""}
+    - {header: REV, source: "Projetos!K REVISÃO", format: inteiro, align: right, empty_if_not_received: true}
+    - {header: "1º Nível", source: "Projetos!O Disciplina ACEITA?", display: "capitalizado ('sim' vira 'Sim'; o Power BI funde caixa)"}
+    - {header: "2º Nível", source: "Projetos!S Status (AVALIAÇÃO)", display: "valor com caixa canônica ('Aprovado com Ressalvas' aparece 'Aprovado com ressalvas'); vazio se não houver"}
+    - {header: "Entrega da Revisão", source: "Projetos!W (texto digitado ou data)", display_historic: "datas em M/D/AAAA (artefato de localidade do Power BI)", display_proposed: "dd/mm/aa como as demais datas: decisão"}
+  header_sort_marker: "seta sob 'Disciplina' no histórico (ordenação do visual); opcional"
+  donut:
+    title: Entrega
+    measure: "contagem das linhas filtradas por Projetos!I Status (SITUAÇÃO)"
+    categories_legend_order: [Analisada, Atrasado, Em análise]
+    categories_note: "ordem alfabética; outras situações criariam categorias novas"
+    colors_powerbi_default: {Analisada: "#118DFF", Atrasado: "#12239E", Em análise: "#E66C37"}
+    labels: "N (P%); o histórico alterna '17,00 (77,27%)' e '15 (75%)' entre rodovias (formato manual): padronizar"
+    check_no14_v438: {RD-103: "17 / 3 / 2", RD-101: "15 / 4 / 3", RD-102A: "15 / 3 / 2"}
+  header:
+    logo: "Programa (asset institucional)"
+    updated_at: "'Atualizado em:' + status_reference_date em dd/mm/aaaa"
+    slicers: "'Disciplina' = 'Todos' e 'GRUPO' com os grupos da rodovia em ordem alfabética, 2 por linha; decorativos no visual reconstruído: decisão (manter estático ou omitir)"
+    road_label: "rodovia normalizada no canto inferior esquerdo (RD-102A)"
+  validation: "agente E: v437 a v439 reproduzem 100% das 504 células dos 4 quadros do nº 14; v328 as do nº 13"
+
+clauses:
+  foram_tratadas_disciplinas_como:
+    where: "P2.1_SUMMARY_S3_P22 (resumo executivo), não no bloco por rodovia"
+    present: [Junho/2026, Julho/2026]
+    absent: [Maio/2026, Agosto/2026]
+    candidate_rule: "disciplinas com devolutiva no GED no mês de referência (GED!J 'Devolutiva - GED' ou GED!P 'Devolutiva - Aprovação' dentro do mês), fundindo 'Memoriais de Cálculo Estrutural e Quantitativo' em 'Projeto de OAE'"
+    evidence: "junho: 13 devolutivas, 12 após a fusão = exatamente as 12 da cláusula. Julho: cláusula idêntica à de junho, mas julho tem DAP, Geológicos, Hidrológicos, Topográficos e Tráfego a mais (COPY_FORWARD_ERROR). Recebidas (GED!H) não casam (junho inclui Topográficos e Tráfego)."
+    order: "editorial, não é Ordem Disciplina (Geométrico antes de Geotécnicos, Pavimentação antes de Drenagem, OAE antes do Secundário)"
+    names: "formas curtas próprias ('Projeto de Drenagem e OAC', 'Projeto de OAE', 'Projeto de Interferências')"
+    confidence: MEDIUM
+    current_standard: "AUSENTE no nº 14 (TRUE_CHANGE; resta o espaço 'projetos. '). Default: não emitir"
+  em_analise_vazio: "ver line_presence.in_analysis e templates.in_analysis.empty"
+
+measurement:
+  text_lines_total_no14: 64
+  text_lines_breakdown: "4 títulos de rodovia + 15 títulos de grupo + 45 linhas de status"
+  structure: "títulos e grupos 19 de 19; ordem dos grupos 16 de 16 (rodovia x mês) com group_order"
+  status_set_level:
+    v436_best_fit: "44 de 45 (97,8%); 0 linhas criadas a mais, 0 omitidas"
+    v438_quadro_snapshot: "42 de 45 (93,3%)"
+    current_local_copy: "26 de 45 (57,8%); mais 4 linhas que o relatório tem e a regra não cria, e 3 que a regra cria"
+    no13_v328: "38 de 40 (95,0%) nas linhas presentes; 9 linhas que a regra cria e o nº 13 não tem (pendentes e não entregues ainda não adotados)"
+  status_literal_with_canonical_templates:
+    v436: "21 de 45 idênticas (46,7%); 24 de 45 equivalentes ignorando caixa, artigo e pontuação final (53,3%)"
+    reason: "variação de redação (foram ou encontram-se, nomes curtos, artigos, ordem herdada); esperado por DEC-007"
+  overall_no14_vs_v436: "63 de 64 linhas com conteúdo correto (98,4%); 40 de 64 literais (62,5%)"
+  divergences:
+    rule_error: "nenhuma conhecida na janela; a regra de pendentes é MEDIUM"
+    copy_forward_anomaly: "RD-101 OAE aceitação cita só o Projeto de OAE (anomalia P2.2_OAE_RD101_ACEITO_INCOMPLETO, já registrada pelo agente E)"
+    snapshot_timing: "de v436 para v437 (04/09 19:53) a Pavimentação da RD-101 passa de Reprovado para Em análise: texto (v436) e quadro (v437 em diante) saíram de versões diferentes (anomalia P2.2_PAVIMENTACAO_RD101_STATUS_DEFASADO)"
+    live_sheet_current_copy: "as 19 divergências de conjunto e as 7 de presença da cópia atual desaparecem na v436 (OAE RD-103 aprovado e RD-101 em análise; Sinalização RD-103 aprovada; Orçamento e Cronograma RD-103 e RD-102A recebidos entre 15 e 21/09; Drenagem RD-101 reprovada; Desapropriação, Paisagismo e Sinalização RD-101; Pavimentação e Interferência RD-104 aprovadas; Desapropriação, RCA e Interferência RD-104 analisadas). Toda divergência da cópia atual é planilha viva."
+
+new_anomaly_candidates:
+  - component: P2.2_APROVADOS_COM_RESSALVA_GENERALIZADO
+    report: "nº 13 e nº 14"
+    observed: "RD-104 Principal: 'o Projeto Geométrico e Interseções e o Projeto de Terraplenagem encontram-se aprovados com ressalva'"
+    expected: "Geométrico 'Aprovado' (sem ressalva); só Terraplenagem com ressalva"
+    classification: COPY_FORWARD_ERROR
+    confidence: HIGH_CONFIDENCE
+    should_learn_as_rule: false
+  - component: P2.2_ORDEM_HERDADA_SECUNDARIO
+    report: "nº 13 e nº 14"
+    observed: "RD-102A Secundário aceitação e aprovação, RD-104 Secundário aceitação fora da Ordem Disciplina"
+    expected: "ordem da coluna A de Projetos"
+    classification: FORMAT_VARIATION
+    confidence: HIGH_CONFIDENCE
+    should_learn_as_rule: false
+  - component: P2.2_NAO_ENTREGUES_RD103_NO13
+    report: "nº 13"
+    observed: "RD-103 Secundário 'não entregues' sem o Projeto de Paisagismo"
+    expected: "Paisagismo também sem entrega na v328"
+    classification: HISTORICAL_DEFECT
+    confidence: HIGH_CONFIDENCE
+    should_learn_as_rule: false
+  - component: P2.2_QUADRO_DATA_MDY
+    report: "nº 13 e nº 14"
+    observed: "'Entrega da Revisão' em M/D/AAAA (9/8/2026)"
+    expected: "dd/mm/aa como as demais colunas"
+    classification: FORMAT_VARIATION
+    confidence: CONFIRMED
+    should_learn_as_rule: false
+  - component: P2.2_GED_RODOVIA_RD103_0
+    report: "fonte"
+    observed: "GED RODOVIA 'RD-103-0' (2 linhas)"
+    expected: "RD-103"
+    classification: HISTORICAL_DEFECT
+    confidence: CONFIRMED
+    should_learn_as_rule: false
+  - component: P2.1_CLAUSULA_DISCIPLINAS_JULHO
+    report: "nº 13"
+    observed: "'Foram tratadas disciplinas como' idêntica à de junho"
+    expected: "devolutivas de julho (mais DAP, Geológicos, Hidrológicos, Topográficos, Tráfego)"
+    classification: COPY_FORWARD_ERROR
+    confidence: MEDIUM_CONFIDENCE
+    should_learn_as_rule: false
+
+gaps:
+  - "pending_approval é MEDIUM: um mês; testar no Relatório G2 nº 15 antes de congelar"
+  - "status_reference_date não está em nenhuma fonte: entrada manual (igual ao 'Atualizado em' do quadro)"
+  - "situações 'No prazo' e 'Aguardando início da análise' sem verbalização observada"
+  - "forma vazia da Aceitação nunca observada"
+  - "snapshot do texto (v436) diferente do snapshot do quadro (v437 a v439); a regra de escolha de versão é do agente E"
+  - "nº 11 e nº 12 não medidos contra snapshot (rótulos diferentes: Observações, reprovadas ou não aceitas, parecer emitido)"
+  - "group_order depende de o GED ser log só de acréscimo (primeira data estável); não verificado em versões antigas do GED"

@@ -1,0 +1,390 @@
+_meta:
+  generated_by: scripts/13_extract_static_assets.py
+  source: Relatório G2 nº 14 — Agosto/2026 (DOCX), comparado com nº 11, 12, 13
+  raw_dir_gitignored: 'assets/discovered/raw/ (.gitignore: /assets/discovered/raw/)'
+  personal_data: contains_people_photos=true NÃO pode ir para assets/branding versionado sem decisão da Emmily
+  width_height: extent do DOCX (EMU/360000); para mídias internas do pptx, xfrm do slide/layout
+assets:
+- asset_id: presentation_coordination_strip
+  file: assets/discovered/raw/presentation_coordination_strip.png
+  source_part: 'nº 14 DOCX :: word/media/image2.png'
+  sha1: 5325daf3289ca847d88cbee6f0a6f5db178fc7ae
+  bytes: 669572
+  format: PNG
+  intrinsic:
+    px:
+    - 1212
+    - 392
+    mode: RGBA
+    dpi: null
+  width_cm: 16.04
+  height_cm: 5.19
+  placement: seção 0, pág. 3, Apresentação (body[8]), inline 16,04 cm
+  identical_sha1_in:
+    2026-05: word/media/image2.png
+    2026-06: word/media/image2.png
+    2026-07: word/media/image2.png
+    2026-08: word/media/image2.png
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: true
+  classification: STATIC_ASSET
+  note: faixa com 5 fotos + legendas das coordenações (não é logotipo); fotos ilustrativas com pessoas, 1 rosto visível
+- asset_id: landscape_block_01_delivery_periodicity
+  file: assets/discovered/raw/landscape_block_01_delivery_periodicity.png
+  source_part: 'nº 14 DOCX :: word/media/image3.png'
+  sha1: 67db1a285d9301bb94d50661eda5e752d2f45606
+  bytes: 98021
+  format: PNG
+  intrinsic:
+    px:
+    - 1442
+    - 743
+    mode: RGBA
+    dpi:
+    - 120.0
+    - 120.0
+  width_cm: 25.79
+  height_cm: 13.29
+  placement: seção 1 (paisagem), pág. 7, body[58], inline jc=center
+  identical_sha1_in:
+    2026-05: word/media/image3.png
+    2026-06: word/media/image3.png
+    2026-07: word/media/image3.png
+    2026-08: word/media/image3.png
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: tabela 'Visão geral — periodicidade de entregas'
+- asset_id: landscape_block_02_periodic_reports
+  file: assets/discovered/raw/landscape_block_02_periodic_reports.png
+  source_part: 'nº 14 DOCX :: word/media/image4.png'
+  sha1: cddac74e2934c38d00c0abc28d1cf9ba455dc0b1
+  bytes: 79239
+  format: PNG
+  intrinsic:
+    px:
+    - 1450
+    - 750
+    mode: RGBA
+    dpi:
+    - 120.0
+    - 120.0
+  width_cm: 26.15
+  height_cm: 13.52
+  placement: seção 1, pág. 8, body[59], inline
+  identical_sha1_in:
+    2026-05: word/media/image4.png
+    2026-06: word/media/image4.png
+    2026-07: word/media/image4.png
+    2026-08: word/media/image4.png
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: quadro 'Relatórios periódicos'
+- asset_id: landscape_block_03_environmental_conditions
+  file: assets/discovered/raw/landscape_block_03_environmental_conditions.png
+  source_part: 'nº 14 DOCX :: word/media/image5.png'
+  sha1: 75694fba121f7d6a373b9a26d1a31c3e44251a53
+  bytes: 98672
+  format: PNG
+  intrinsic:
+    px:
+    - 1445
+    - 781
+    mode: RGBA
+    dpi:
+    - 120.0
+    - 120.0
+  width_cm: 27.02
+  height_cm: 14.61
+  placement: seção 1, pág. 9, body[60], inline; 27,02 cm > 26,20 cm úteis (anomalia herdada)
+  identical_sha1_in:
+    2026-05: word/media/image5.png
+    2026-06: word/media/image5.png
+    2026-07: word/media/image5.png
+    2026-08: word/media/image5.png
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: quadro 'Condicionantes ambientais'
+- asset_id: landscape_block_04_meeting_minutes
+  file: assets/discovered/raw/landscape_block_04_meeting_minutes.png
+  source_part: 'nº 14 DOCX :: word/media/image6.png'
+  sha1: ea043a7cbf1ba95dffa3969361f605f752f63c06
+  bytes: 60631
+  format: PNG
+  intrinsic:
+    px:
+    - 1462
+    - 763
+    mode: RGBA
+    dpi:
+    - 120.0
+    - 120.0
+  width_cm: 26.46
+  height_cm: 13.81
+  placement: seção 1, pág. 10, body[61], inline; 26,45 cm > 26,20 cm úteis (anomalia herdada)
+  identical_sha1_in:
+    2026-05: word/media/image6.png
+    2026-06: word/media/image6.png
+    2026-07: word/media/image6.png
+    2026-08: word/media/image6.png
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: quadro 'Atas e memórias de reunião'
+- asset_id: landscape_block_05_operational_org_cover
+  file: assets/discovered/raw/landscape_block_05_operational_org_cover.jpg
+  source_part: 'nº 14 DOCX :: word/media/image7.jpg'
+  sha1: 5ff7114ecaa992cce7e1f39f064cbb63d44569a1
+  bytes: 614854
+  format: JPEG
+  intrinsic:
+    px:
+    - 4000
+    - 2250
+    mode: RGB
+    dpi:
+    - 300.0
+    - 300.0
+  width_cm: 26.2
+  height_cm: 14.74
+  placement: seção 1, pág. 11, body[62] run 1 (4 imagens no mesmo parágrafo)
+  identical_sha1_in:
+    2026-05: null
+    2026-06: word/media/image7.jpg
+    2026-07: word/media/image7.jpg
+    2026-08: word/media/image7.jpg
+  stable_since: 2026-06
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: capa 'Consolidação da organização operacional' (slide exportado)
+- asset_id: landscape_block_06_functional_org_chart
+  file: assets/discovered/raw/landscape_block_06_functional_org_chart.jpg
+  source_part: 'nº 14 DOCX :: word/media/image8.jpg'
+  sha1: 871d7117109490e94967d3cafd5ae7004a42e3d9
+  bytes: 1554333
+  format: JPEG
+  intrinsic:
+    px:
+    - 4000
+    - 2250
+    mode: RGB
+    dpi:
+    - 300.0
+    - 300.0
+  width_cm: 26.2
+  height_cm: 14.74
+  placement: seção 1, pág. 12, body[62] run 2
+  identical_sha1_in:
+    2026-05: null
+    2026-06: word/media/image8.jpg
+    2026-07: word/media/image8.jpg
+    2026-08: word/media/image8.jpg
+  stable_since: 2026-06
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: 'organograma funcional: só cargos/funções, sem nomes nem fotos'
+- asset_id: landscape_block_07_projects_coordination
+  file: assets/discovered/raw/landscape_block_07_projects_coordination.jpg
+  source_part: 'nº 14 DOCX :: word/media/image9.jpg'
+  sha1: ccfd5b181db7f38355dd2be4ac43e12c38ac7c8c
+  bytes: 1141135
+  format: JPEG
+  intrinsic:
+    px:
+    - 4000
+    - 2250
+    mode: RGB
+    dpi:
+    - 300.0
+    - 300.0
+  width_cm: 26.2
+  height_cm: 14.74
+  placement: seção 1, pág. 13, body[62] run 3
+  identical_sha1_in:
+    2026-05: null
+    2026-06: word/media/image9.jpg
+    2026-07: word/media/image9.jpg
+    2026-08: word/media/image9.jpg
+  stable_since: 2026-06
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: Coordenação de Projetos (slide); sem nomes nem fotos
+- asset_id: landscape_block_08_works_field_coordination
+  file: assets/discovered/raw/landscape_block_08_works_field_coordination.jpg
+  source_part: 'nº 14 DOCX :: word/media/image10.jpg'
+  sha1: c20174d8b3910bd030cfeaaba6aa2697e141c1fb
+  bytes: 1135896
+  format: JPEG
+  intrinsic:
+    px:
+    - 4000
+    - 2250
+    mode: RGB
+    dpi:
+    - 300.0
+    - 300.0
+  width_cm: 26.2
+  height_cm: 14.74
+  placement: seção 1, pág. 14, body[62] run 4
+  identical_sha1_in:
+    2026-05: null
+    2026-06: word/media/image10.jpg
+    2026-07: word/media/image10.jpg
+    2026-08: word/media/image10.jpg
+  stable_since: 2026-06
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: Coordenação de Obras e Campo (slide); sem nomes nem fotos
+- asset_id: p22_predecessor_disciplines_diagram
+  file: assets/discovered/raw/p22_predecessor_disciplines_diagram.emf
+  source_part: 'nº 14 DOCX :: word/media/image12.emf'
+  sha1: bd495352ad78fbca7698216bc1ddfab2d1830e45
+  bytes: 30240
+  format: EMF
+  intrinsic:
+    bounds_px:
+    - 805
+    - 626
+    frame_cm:
+    - 14.42
+    - 11.24
+  width_cm: 15.22
+  height_cm: 11.83
+  placement: seção 2, pág. 17, P2.2 (body[84]), inline 15,22 cm
+  identical_sha1_in:
+    2026-05: word/media/image9.emf
+    2026-06: word/media/image12.emf
+    2026-07: word/media/image12.emf
+    2026-08: word/media/image12.emf
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: EMF vetorial; no nº 11 a parte se chama image9.emf
+- asset_id: cover_slide_template
+  file: assets/discovered/raw/cover_slide_template.pptx
+  source_part: 'nº 14 DOCX :: word/embeddings/Microsoft_PowerPoint_Presentation.pptx'
+  sha1: ff08fe4369b0b2eba16fff438b425116bca774eb
+  bytes: 4944260
+  format: PPTX
+  intrinsic:
+    bytes: 4944260
+  width_cm: 21.0
+  height_cm: 29.7
+  placement: parágrafo 0, objeto OLE PowerPoint.Show.12 (sangria total)
+  identical_sha1_in:
+    2026-05: difere (só slide1/thumbnail/props; ver cover_media)
+    2026-06: difere (só slide1/thumbnail/props; ver cover_media)
+    2026-07: difere (só slide1/thumbnail/props; ver cover_media)
+    2026-08: idêntico
+  stable_since: 2026-08
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: pacote do slide de capa do nº 14; campos variáveis em ppt/slides/slide1.xml sp id=41 e id=42
+- asset_id: cover_photo_background
+  file: assets/discovered/raw/cover_photo_background.jpeg
+  source_part: 'nº 14 DOCX :: word/embeddings/Microsoft_PowerPoint_Presentation.pptx :: ppt/media/image2.jpeg'
+  sha1: b15a51dbd2a43668cf99d5b23c1ae89c35227b26
+  bytes: 4789839
+  format: JPEG
+  intrinsic:
+    px:
+    - 3710
+    - 2474
+    mode: RGB
+    dpi:
+    - 330.0
+    - 330.0
+  width_cm: 19.45
+  height_cm: 28.1
+  placement: 'dentro do pptx: slideLayout1 ''Picture 3'', srcRect l=14342 t=-863 r=47361 b=17886, off(-145775,-105280)'
+  identical_sha1_in:
+    2026-05: ppt/media/image2.jpeg
+    2026-06: ppt/media/image2.jpeg
+    2026-07: ppt/media/image2.jpeg
+    2026-08: ppt/media/image2.jpeg
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: foto aérea de rodovia/floresta, sem pessoas
+- asset_id: cover_logo_prog
+  file: assets/discovered/raw/cover_logo_prog.svg
+  source_part: 'nº 14 DOCX :: word/embeddings/Microsoft_PowerPoint_Presentation.pptx :: ppt/media/image3.svg'
+  sha1: cd8512a6c1ccc6c6f46aeb1fe858f7412112088f
+  bytes: 22956
+  format: SVG
+  intrinsic:
+    svg_header: viewBox="0 0 96.99 51.84"
+  width_cm: 7.93
+  height_cm: 4.25
+  placement: 'dentro do pptx: slide1 ''Gráfico 2'' off(1040669,983324)'
+  identical_sha1_in:
+    2026-05: ppt/media/image3.svg
+    2026-06: ppt/media/image3.svg
+    2026-07: ppt/media/image3.svg
+    2026-08: ppt/media/image3.svg
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: SVG vetorial branco; a:blip sem fallback raster
+- asset_id: cover_logos_partners
+  file: assets/discovered/raw/cover_logos_partners.svg
+  source_part: 'nº 14 DOCX :: word/embeddings/Microsoft_PowerPoint_Presentation.pptx :: ppt/media/image4.svg'
+  sha1: d42dcaf44b53976feb684c1a41b7570b138c3993
+  bytes: 92618
+  format: SVG
+  intrinsic:
+    svg_header: width="620" height="1064"
+  width_cm: 5.24
+  height_cm: 8.93
+  placement: 'dentro do pptx: slide1 ''Gráfico 3'' off(1040669,3345983)'
+  identical_sha1_in:
+    2026-05: ppt/media/image4.svg
+    2026-06: ppt/media/image4.svg
+    2026-07: ppt/media/image4.svg
+    2026-08: ppt/media/image4.svg
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: SVG que embute PNG 620x1064 (Dynatest, Escritório Jurídico, Consultoria de Engenharia, Certificadora)
+- asset_id: cover_thinkcell_placeholder
+  file: assets/discovered/raw/cover_thinkcell_placeholder.emf
+  source_part: 'nº 14 DOCX :: word/embeddings/Microsoft_PowerPoint_Presentation.pptx :: ppt/media/image1.emf'
+  sha1: d478573344e54ed73d683938f6b4a6f5b9ddd6a6
+  bytes: 192
+  format: EMF
+  intrinsic:
+    bounds_px:
+    - 0
+    - 0
+    frame_cm:
+    - 0.0
+    - 0.0
+  width_cm: 0.0
+  height_cm: 0.01
+  placement: 'dentro do pptx: slideMaster1 ''Objeto 6'' hidden (think-cell)'
+  identical_sha1_in:
+    2026-05: ppt/media/image1.emf
+    2026-06: ppt/media/image1.emf
+    2026-07: ppt/media/image1.emf
+    2026-08: ppt/media/image1.emf
+  stable_since: 2026-05
+  stable_since_note: janela de evidência começa em 2026-05 (nº 11); antes disso não verificado
+  contains_people_photos: false
+  classification: STATIC_ASSET
+  note: resíduo do think-cell, oculto, não aparece

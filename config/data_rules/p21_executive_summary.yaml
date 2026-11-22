@@ -1,0 +1,272 @@
+# Proposta (agente K, READ-ONLY) - resumo executivo do produto 2.1 + bloco de reunioes
+# Evidencia: docx n 11-14 (paragrafos 41-46 e 63-71/73) x Lista Mestra v335.0 (n 14, 12, 11) e v134.0 (n 13)
+# Classes: FIXED | DERIVABLE | INTERPRETIVE (AI_SYNTHESIS + revisao humana) | EXTERNAL (entrada manual)
+status: CANDIDATE
+selection: "rows = ml.select(ml.load(lista), report_number)"
+type_key: "prefixo do campo Documento (AT, CT, POP, IT, NT, PA, RO, RM, NC, RNC, RI, RA, RCA, BM, OF); NAO usar Manifestacao (em v134.0 a coluna chama 'Parecer' e o loader devolve None)"
+config:
+  rodovias_gerenciadas: [RD-101, RD-102A, RD-103, RD-104]
+  meetings:            # ordem estavel 104,103,102A,101 (nao reordenar)
+    - {rodovia: RD-104, executora: "Consórcio TETRA ENGEX", weekday: quintas, hour: "10h"}
+    - {rodovia: RD-103, executora: "DELTA", weekday: quintas, hour: "11h"}
+    - {rodovia: RD-102A, executora: "Consórcio CLX/TRAFEX", weekday: sextas, hour: "10h"}
+    - {rodovia: RD-101, executora: "CSG", weekday: segundas, hour: "14h"}   # sextas 11h ate n 12
+  meetings_source:
+    executora: "03 - acompanhamento de projetos executivo.xlsx / Painel de Controle ('RD-103 - DELTA' etc.) -> DERIVABLE"
+    weekday: "validacao: moda do dia da semana de Data Entrega das AT-* do produto 2.1 por Empreendimento (bate n11, n12, n13)"
+    hour: EXTERNAL
+paragraphs:
+  - id: products_overview
+    class: DERIVABLE
+    text: "No período de referência do presente relatório, foram desenvolvidos produtos relacionados aos itens {products_with_rows}."
+    slots: {products_with_rows: "codigos de produto distintos em rows, ordenados, 'P2.x', 'e' final"}
+  - id: p21_coordination
+    class: FIXED_WITH_CONDITIONAL_CLAUSE
+    text: "No Produto P2.1, foram realizadas atividades contínuas de coordenação setorial e alinhamento técnico entre as equipes envolvidas nos empreendimentos {rodovias_gerenciadas}. Destacam-se as reuniões periódicas conduzidas com as empresas executoras{atas_clause}{p21_meeting_topics}. Ademais, deu-se continuidade à integração entre as equipes de campo e escritório, visando garantir a compatibilização das informações técnicas, o acompanhamento das condicionantes e a consolidação das atividades desenvolvidas no âmbito do Grupo 2."
+    slots:
+      atas_clause: "', formalizadas por meio das Atas de Reunião emitidas no período' se count(produto 2.1, prefixo AT) > 0 (4/4 meses: 16, 9, 6, 0)"
+      p21_meeting_topics: "render_maps.p21_meeting_topics: só as tratativas citadas na Descrição das AT do 2.1 do relatório; nenhuma -> cláusula omitida"
+  - id: p21_other_docs
+    class: INTERPRETIVE
+    trigger: "existe linha do produto 2.1 com prefixo fora de AT/CT/POP/IT (n14: PA-680.1, NT-740.1, NT-765.1)"
+    note: "Lacuna: o n14 nao cita esses documentos. Slot NOVO, opcional, AI_SYNTHESIS + revisao."
+  - id: p21_standardization
+    class: DERIVABLE_WITH_INTERPRETIVE_SLOT
+    trigger: "existe linha do produto 2.1 com prefixo IT, CT ou POP (4/4)"
+    text: "Foram formalizados documentos voltados à padronização das rotinas técnicas de fiscalização, gestão ambiental e segurança do trabalho. Nesse contexto, foram entregues {standard_docs}.{in_progress}"
+    slots:
+      standard_docs: "agrupar por prefixo; faixa 'CT-502.1 a CT-504.1' se consecutivos; descricao vinda de Descricao (POP/IT) ou tema (CT -> INTERPRETIVE)"
+      in_progress: "EXTERNAL (n11 'POP 007 e 008 em elaboracao', n12 'POP-009.1 em elaboracao'); vazio por padrao"
+  - id: p22_overview
+    class: DERIVABLE
+    text: "No que se refere ao Produto P2.2, foram emitidas {p22_types} relacionados ao acompanhamento, recebimento, aceitação e análise técnica dos estudos e projetos executivos das rodovias {p22_rodovias}. As análises contemplaram verificações de 1º nível, voltadas à aceitação documental das disciplinas encaminhadas pelas empresas executoras, bem como análises de 2º nível, destinadas à avaliação técnica para aprovação dos projetos.{p22_disciplines}"
+    slots:
+      p22_types: "NT -> 'Notas Técnicas', PA -> 'Pareceres Técnicos' (presentes no produto 2.2)"
+      p22_rodovias: "Empreendimento distinto do produto 2.2, sem 'Geral'"
+      p22_disciplines: "opcional: disciplinas da Descricao de NT/PA 2.2 normalizadas; n12-n13 frase identica (copy-forward), n14 removida"
+  - id: p22_pareceres_themes
+    class: INTERPRETIVE
+    text: "Também foram emitidos pareceres técnicos com caráter preliminar, complementar ou de apoio à análise dos projetos executivos, abrangendo temas como {p22_pa_themes}. Esses documentos tiveram como objetivo registrar apontamentos técnicos, solicitar complementações, avaliar manifestações das empresas executoras, subsidiar encaminhamentos ao Parceiro/Órgão Contratante e apoiar a continuidade das análises das disciplinas de projeto."
+    trigger: "existe PA no produto 2.2"
+    slots:
+      p22_pa_themes: "AI_SYNTHESIS sobre Descricao (+ conteudo) dos PA 2.2; candidatos n14: interferencia de iluminacao/rede eletrica, desapropriacao, complementacao da DUP, eventograma. Revisao humana obrigatoria."
+  - id: p24_overview
+    class: DERIVABLE
+    text: "No âmbito do Gerenciamento Técnico (P2.4), deu-se continuidade às atividades de acompanhamento técnico das obras dos trechos {p24_rodovias}, por meio da elaboração dos {p24_types}.{p24_activities_sentence}"
+    slots:
+      p24_types: "prefixos presentes no produto 2.4 -> rotulos fixos (RO, RM, AT, NC, RNC, OF, PA, BM, RCA, RI, RA), ordem fixa do texto de n12-n14"
+      p24_rodovias: "render_maps.highway_forms.p24_rodovias (1 rodovia: 'do trecho RD-x')"
+      p24_activities_sentence: "render_maps.p24_activities: só atividades com documento do 2.4 no relatório; nenhuma -> frase omitida"
+  - id: p24_measurements
+    class: DERIVABLE
+    trigger: "existe BM no relatorio"
+    text: "Quanto às medições, foram elaborados os Boletins de Medição {bm_rodovias_clause}. {bm_detail} As análises tiveram como objetivo verificar a compatibilidade entre os serviços pleiteados, os eventos previstos em eventograma, a documentação de suporte, os registros de campo e os critérios de medição aplicáveis."
+    slots:
+      bm_rodovias_clause: "render_maps.measurements.highways_clause: one_highway (1 rodovia) | many_highways (2+), como P2.4_RM"
+      bm_detail: "por rodovia: 'Na RD-x, foram avaliados os Boletins de Medição NN, NN e NN, referentes aos meses de <mes>/<ano>...' (Descricao 'Boletim de Medição de <Mes>/<ano>'), como no n12"
+  - id: p24_pareceres_themes
+    class: DERIVABLE_BY_KEYWORD_MAP
+    text: "Adicionalmente, foram emitidos pareceres técnicos no âmbito do Produto P2.4, contemplando {p24_pa_themes}."
+    slots:
+      p24_pa_themes: "mapa palavra-chave da Descricao dos PA 2.4 -> tema (ambiental, sst, obra, controle tecnologico, resposta a NC -> 'analise de evidencias para encerramento de ocorrencias', eventograma); revisao humana"
+  - id: closing
+    class: DERIVABLE_BY_KEYWORD_MAP
+    text: "De forma geral, os produtos desenvolvidos no período demonstram a continuidade da atuação do Programa {closing_themes}."
+    slots:
+      # QA2-E: a frase fixa dos nº 12–14 enumerava as oito atuações em todo relatório; num mês
+      # sem BM, sem RI/SST ou sem 2.1 ela afirmaria 'controle de medições', 'segurança do
+      # trabalho' ou 'coordenação setorial' sem documento. Mapa de temas por slot, como o NN no
+      # 2.4 (p24_blocks.yaml `slots.<nome>.themes`): cada atuação só sai com documento do
+      # relatório (todos os produtos) que a sustente — Produto em `products`, prefixo do
+      # Documento em `prefixes` OU Descrição normalizada casando `any` (regex). Ordem = ordem do
+      # texto nº 12–14; `label` já traz a preposição. Slot obrigatório (`required: true`):
+      # nenhuma atuação sustentada = o S8 não se aplica (`when_unsupported: SKIPPED`).
+      # Padrões de medições, ambiental, SST e NC = os de render_maps.p24_activities;
+      # 'alojamento' = RI/IT de inspeção de alojamento (render_maps.p24_types_not_cited.RI).
+      closing_themes:
+        fills: [config/data_rules/p21_executive_summary.yaml#paragraphs/closing/text, config/g2_content_blocks.yaml#P2.1_SUMMARY_S8_FECHO]
+        required: true
+        when_unsupported: SKIPPED
+        join: {sep: ", ", last_sep: " e "}
+        confidence: MEDIUM
+        themes:
+          - {label: "na coordenação setorial", products: ["2.1"], prefixes: [], any: []}
+          - {label: "no acompanhamento das entregas de projeto executivo", products: ["2.2"], prefixes: [], any: []}
+          - {label: "no gerenciamento técnico das obras", products: ["2.4"], prefixes: [], any: []}
+          - {label: "no controle de medições", products: [], prefixes: [BM], any: ["eventograma", "afericao", "ateste", "medic"]}
+          - {label: "no monitoramento ambiental", products: [], prefixes: [RA, RCA], any: ["ambiental", "condicionante", "licenc"]}
+          - {label: "na verificação da segurança do trabalho", products: [], prefixes: [RI], any: ["\\bsst\\b", "seguranca do trabalho", "alojamento"]}
+          - {label: "na gestão de não conformidades", products: [], prefixes: [NC, RNC], any: ["nao conformidade", "plano de acao"]}
+          - {label: "no suporte técnico às decisões administrativas necessárias ao avanço dos empreendimentos", products: [], prefixes: [PA, NT, OF], any: []}
+        evidence: "nº 12–14: frase idêntica com as 8 atuações, e as 8 sustentadas por documento em cada mês (Lista Mestra v335 nº 12 e 14, v134 nº 13): reproduz 3/3 sem anomalia; a frase fixa só afirmaria sem documento num mês sem eles (QA2-E, nº 15 sintético: coordenação, medições e SST)"
+  - id: table_call
+    class: FIXED
+    text: "A relação dos produtos desenvolvidos no período se encontra na tabela apresentada a seguir."
+# ---------------------------------------------------------------------------------------------
+# render_maps: mapas e rótulos consumidos por prog_g2_report.render.p21_text (builder Y).
+# Única chave acrescentada a este arquivo pelo builder; os textos-base continuam em `paragraphs`.
+# Cada mapa cita a evidência. Ordem das listas = ordem de emissão no texto. Regex são aplicadas à
+# Descrição normalizada (sem acento, minúscula, espaços colapsados).
+render_maps:
+  product_label: "P{code}"                       # products_overview: '2.1' -> 'P2.1'
+  highway_exclude: [Geral]                       # p22_rodovias / p24_rodovias: sem 'Geral'
+  bold_literals:                                 # runs em negrito do texto fixo (fmt_12..14, agente J)
+    p21_coordination: ["No Produto P2.1,"]
+    p22_overview: ["Produto P2.2"]
+    p24_overview: ["No âmbito do Gerenciamento Técnico (P2.4),"]
+  atas_clause:                                   # p21_coordination.atas_clause (4/4: 16, 9, 6, 0 AT)
+    trigger: {product: "2.1", prefix: AT}
+    # a vírgula que fechava a cláusula passou para o início de p21_meeting_topics (QA2-C)
+    segments:
+      - {text: ", formalizadas por meio "}
+      - {text: "das Atas de Reunião", bold: true}
+      - {text: " emitidas no período"}
+  p21_meeting_topics:                            # p21_coordination.p21_meeting_topics
+    # QA2-C (varredura do Gate D): a frase fixa dos nº 12–14 atribuía às reuniões seis tratativas
+    # que nenhuma AT do 2.1 sustenta — a Descrição de todas é 'Reunião de alinhamento técnico'
+    # (nº 12: 9 AT, nº 13: 6, nº 14: nenhuma; anomalia P2.1_S1_TEMAS_REUNIOES_SEM_SUPORTE). Cada
+    # tratativa só sai com AT do 2.1 do relatório cuja Descrição normalizada casa `any` (regex),
+    # na ordem do texto observado; `lead` no 1º item, `bare` nos demais. Nenhuma: a cláusula sai
+    # inteira e fica 'Destacam-se as reuniões periódicas conduzidas com as empresas executoras'.
+    confidence: MEDIUM
+    fills: [config/data_rules/p21_executive_summary.yaml#paragraphs/p21_coordination, config/g2_content_blocks.yaml#P2.1_SUMMARY_S1_P21]
+    trigger: {product: "2.1", prefix: AT}
+    sentence: ", as quais contemplaram tratativas relacionadas {p21_meeting_topics}"
+    join: {sep: ", ", last_sep: " e "}
+    themes:
+      - {label: "acompanhamento das entregas de projeto executivo", lead: "ao acompanhamento das entregas de projeto executivo", bare: "acompanhamento das entregas de projeto executivo", any: ["projetos? executivos?", "entregas? de projeto"]}
+      - {label: "alinhamento das atividades técnicas", lead: "ao alinhamento das atividades técnicas", bare: "alinhamento das atividades técnicas", any: ["alinhamento tecnico", "alinhamento das atividades"]}
+      - {label: "registro de pendências", lead: "ao registro de pendências", bare: "registro de pendências", any: ["pendencia"]}
+      - {label: "pactuação de prazos", lead: "à pactuação de prazos", bare: "pactuação de prazos", any: ["prazo", "cronograma"]}
+      - {label: "devolutivas das análises realizadas", lead: "às devolutivas das análises realizadas", bare: "devolutivas das análises realizadas", any: ["devolutiva"]}
+      - {label: "suporte técnico às demandas de engenharia e gerenciamento contratual", lead: "ao suporte técnico às demandas de engenharia e gerenciamento contratual", bare: "suporte técnico às demandas de engenharia e gerenciamento contratual", any: ["suporte tecnico", "contratu"]}
+    evidence: "AT do 2.1 nº 12–14 (v335) e nº 13 (v134): todas 'Reunião de alinhamento técnico' -> só 'alinhamento das atividades técnicas' sustentado (nº 12–13); nº 14 sem AT do 2.1"
+  p22_types:                                     # p22_overview.p22_types (nº 12-14)
+    - {prefix: NT, label: "Notas Técnicas", gender: f}
+    - {prefix: PA, label: "Pareceres Técnicos", gender: m}
+  p22_verb: {literal: "foram emitidas", f: "foram emitidas", m: "foram emitidos"}  # concorda com o 1º rótulo
+  p22_disciplines: {emit: false, model_change: P2.1_CLAUSULA_DISCIPLINAS_REMOVIDA, anomaly: P2.1_RESUMO_DISCIPLINAS_P22, note: "nº 14 removida = padrão vigente (TRUE_MODEL_CHANGE, QA4-H); nº 12-13 copy-forward"}
+  p24_types:                                     # p24_overview.p24_types, ordem do texto nº 12-14
+    # gender/number: concordância do artigo com o 1º rótulo citado (p24_article)
+    - {prefix: RO, label: "Relatórios Semanais de Acompanhamento de Obras", gender: m, number: p}
+    - {prefix: RM, label: "Relatórios Mensais de Acompanhamento de Obras", gender: m, number: p}
+    - {prefix: AT, label: "Atas de Reunião de alinhamento das obras", gender: f, number: p}
+    - {prefix: NC, label: "Notificações de Não Conformidade", gender: f, number: p}
+    - {prefix: OF, label: "Ofício", gender: m, number: s}  # só com OF no 2.4 (nº 12: 2 OF; nº 13-14: 0 -> P2.1_RESUMO_OFICIO_SEM_DOCUMENTO)
+    - {prefix: PA, label: "Pareceres Técnicos", gender: m, number: p}
+    - {prefix: BM, label: "Boletins de Medição", gender: m, number: p}
+    - {prefix: RCA, label: "análises de Relatórios de Controle Ambiental", gender: f, number: p}
+  # artigo antes da enumeração do S5: concorda com o 1º tipo citado ('dos Relatórios...' nos nº
+  # 12-14, RO sempre presente; sem RO e com NC primeiro: 'das Notificações'). `literal` = trecho
+  # do texto-base trocado pela forma (mesma técnica de p22_verb).
+  p24_article: {literal: "elaboração dos", mp: "elaboração dos", fp: "elaboração das", ms: "elaboração do", fs: "elaboração da"}
+  # Concordância 1 × 2+ rodovias de TODO slot de lista de rodovias dos parágrafos deste arquivo
+  # (mesmo mecanismo one_highway/many_highways de measurements.highways_clause e de p24_blocks
+  # P2.4_RM.group_text). `literal` = trecho do texto-base trocado pela forma (técnica de
+  # p24_article). nº 11–14 sempre com 4 rodovias (plural observado); 1 rodovia nunca observada
+  # (revisor W4: 'das obras dos trechos RD-104'). Slots de lista de rodovias nos data_rules:
+  # aqui rodovias_gerenciadas (S1), p22_rodovias (S3), p24_rodovias (S5) e bm_rodovias_clause (S6,
+  # measurements.highways_clause); em p24_blocks P2.4_RM.group_text, P2.4_NC.rnc_sentence e
+  # P2.4_RI (single_highway). Os demais slots de rodovia são por item (uma rodovia cada).
+  highway_forms:
+    rodovias_gerenciadas:                        # p21_coordination (config.rodovias_gerenciadas)
+      literal: "nos empreendimentos {rodovias_gerenciadas}"
+      one_highway: "no empreendimento {highway}"
+      many_highways: "nos empreendimentos {highways}"
+    p22_rodovias:                                # p22_overview
+      literal: "das rodovias {p22_rodovias}"
+      one_highway: "da rodovia {highway}"
+      many_highways: "das rodovias {highways}"
+    p24_rodovias:                                # p24_overview
+      literal: "dos trechos {p24_rodovias}"
+      one_highway: "do trecho {highway}"
+      many_highways: "dos trechos {highways}"
+  p24_activities:                                # p24_overview.p24_activities_sentence
+    # Frase 'Paralelamente…' do S5: cada atividade só sai com documento do 2.4 no relatório que a
+    # sustente (revisor W4 MINOR 4, mesma regra do S7): prefixo do Documento em `prefixes` OU
+    # Descrição normalizada casando `any` (regex). Ordem = ordem do texto nº 12–14; `lead` no 1º
+    # item (com a preposição), `bare` nos demais. Nenhuma sustentada: a frase sai inteira.
+    # A frase fixa dos nº 12–14 citava 'interferências identificadas em campo' sem documento em
+    # nenhum dos três meses (anomalia P2.1_S5_ATIVIDADES_SEM_SUPORTE).
+    confidence: MEDIUM
+    fills: [config/data_rules/p21_executive_summary.yaml#paragraphs/p24_overview, config/g2_content_blocks.yaml#P2.1_SUMMARY_S5_P24]
+    sentence: " Paralelamente, foram desenvolvidas atividades relacionadas {p24_activities}."
+    join: {sep: ", ", last_sep: " e "}
+    themes:
+      - {label: "controle tecnológico", lead: "ao controle tecnológico", bare: "controle tecnológico", prefixes: [], any: ["controle tecnolog", "traco de cbuq"]}
+      - {label: "acompanhamento ambiental", lead: "ao acompanhamento ambiental", bare: "acompanhamento ambiental", prefixes: [RA, RCA], any: ["ambiental"]}
+      - {label: "conformidade de saúde e segurança do trabalho", lead: "à conformidade de saúde e segurança do trabalho", bare: "conformidade de saúde e segurança do trabalho", prefixes: [RI], any: ["\\bsst\\b", "seguranca do trabalho"]}
+      - {label: "interferências identificadas em campo", lead: "às interferências identificadas em campo", bare: "interferências identificadas em campo", prefixes: [], any: ["interferenc"]}
+      - {label: "suporte técnico às medições", lead: "ao suporte técnico às medições", bare: "suporte técnico às medições", prefixes: [BM], any: ["eventograma", "afericao", "ateste", "medic"]}
+      - {label: "controle de não conformidades", lead: "ao controle de não conformidades", bare: "controle de não conformidades", prefixes: [NC, RNC], any: ["nao conformidade", "plano de acao"]}
+      - {label: "acompanhamento contratual das obras", lead: "ao acompanhamento contratual das obras", bare: "acompanhamento contratual das obras", prefixes: [], any: ["contratu", "prestacao de contas", "\\btce\\b", "aditiv", "reequilibrio", "reajuste"]}
+    evidence: "nº 14 (v335): sustenta 6/7 (sem interferências; contratual pelo PA da requisição do TCE-UF); nº 13: 6/7 (contratual pela prestação de contas); nº 12: 5/7 (sem interferências e sem contratual); RI = inspeção de alojamento (SST, IT de inspeção em alojamentos do 2.1)"
+  p24_types_not_cited:                           # presentes no 2.4 e nunca citados no nº 12-14 (outros blocos do 2.4 os tratam)
+    RNC: "Relatório de Não Conformidade (nº 14)"
+    RI: "Relatório de inspeção do alojamento (nº 12-14)"
+    RA: "Relatório Ambiental Consolidado (nº 13-14)"
+  measurements:                                  # p24_measurements
+    query: {prefix: BM, delivery_status: entregue}   # mesma regra de p24_blocks P2.4_BM_LIST
+    order: alpha                                 # p24_blocks ORDER_ALPHA (BM)
+    description_prefix: "Boletim de Medição de "
+    number_format: "{n:02d}"                     # BM-004.1 -> '04' (nº 12)
+    detail_plural: "Na {highway}, foram avaliados os Boletins de Medição {numbers}, referentes aos meses de {months}."
+    detail_singular: "Na {highway}, foi avaliado o Boletim de Medição {numbers}, referente ao mês de {months}."
+    # rodovias com BM: forma singular/plural como P2.4_RM (p24_blocks.yaml group_text). nº 12-13
+    # tinham 3 rodovias (plural); o nº 14, com só RD-104, manteve o plural (anomalia
+    # P2.1_RESUMO_BM_CONCORDANCIA).
+    highways_clause:
+      one_highway: "referentes à {highway}"
+      many_highways: "referentes às rodovias {highways}"
+    evidence: "forma longa do nº 12 reproduzida 3/3 rodovias com v335.0; nº 13-14 'Na RD-101.' truncado (P2.4_FRASE_TRUNCADA_MEDICOES); rodovias do nº 13 copiadas de junho (P2.1_RESUMO_BM_RODOVIAS)"
+  p24_pa_themes:                                 # p24_pareceres_themes
+    confidence: MEDIUM
+    # O modo NÃO é declarado aqui: default único em config/g2_report_model.yaml#editorial_defaults/
+    # p21_s7_mode (keyword_map, padrão: só temas com PA do 2.4 no relatório, seção K; fixed: os 6
+    # temas sempre, texto idêntico nº 12-14). Pela Descrição, nº 14 sustenta 4/6 (sem
+    # condicionantes e sem desapropriação), nº 13 4/6, nº 12 3/6: a frase fixa afirmava tema sem
+    # documento (anomalia P2.1_S7_TEMAS_SEM_SUPORTE). O mapa abaixo é a única fonte dos temas.
+    fills: [config/data_rules/p21_executive_summary.yaml#paragraphs/p24_pareceres_themes, config/g2_content_blocks.yaml#P2.1_SUMMARY_S7_PARECERES_P24]
+    themes:
+      - {label: "avaliação de conformidade ambiental", any: ["conformidade\\b.*\\bambiental", "ambiental e sst"]}
+      - {label: "saúde e segurança do trabalho", any: ["\\bsst\\b", "seguranca do trabalho"]}
+      - {label: "atendimento de condicionantes ambientais", any: ["condicionante", "licenc"]}
+      - {label: "tratativas relacionadas às áreas sujeitas à desapropriação", any: ["desapropria"]}
+      - {label: "análise de evidências para encerramento de ocorrências", any: ["notificacao de nao conformidade", "plano de acao"]}
+      - {label: "avaliação de conformidade técnica de obra", any: ["conformidade\\b.*\\bobra\\b"]}
+    covered_elsewhere:                           # temas de PA 2.4 que o texto nº 12-14 nunca enumera neste parágrafo
+      - {topic: "controle tecnológico", any: ["controle tecnologico", "traco de cbuq"], block: p24_overview}
+      - {topic: "medição/eventograma", any: ["eventograma", "afericao", "ateste de documentacao", "processo de medicao"], block: p24_measurements}
+  standardization:                               # p21_standardization.standard_docs (rascunho determinístico)
+    trigger: {product: "2.1", prefixes: [IT, CT, POP]}
+    kinds:
+      CT: {article_singular: "a", article_plural: "as", label_singular: "Circular Técnica", label_plural: "Circulares Técnicas", ranges: true}
+      POP: {article_singular: "o", article_plural: "os", ranges: false}
+      IT: {article_singular: "a", article_plural: "as", ranges: false}
+    referente: {m: "referente ao", f: "referente à", pm: "referentes aos", pf: "referentes às"}
+    title_genders: {procedimento: m, instrucao: f, circular: f}
+    insert_de_after: ["Procedimento Operacional Padrão", "Instrução Técnica"]   # 'POP Gestão de NC' -> 'POP de Gestão de NC' (nº 12-13)
+  p22_pa_themes_draft:                           # rascunho do slot INTERPRETIVE p22_pa_themes (1º tema que casa)
+    fills: [config/data_rules/p21_executive_summary.yaml#paragraphs/p22_pareceres_themes, config/g2_content_blocks.yaml#P2.1_SUMMARY_S4_TEMAS]
+    themes:
+      - {label: "estudos de tráfego", any: ["trafego", "numero n\\b"]}
+      - {label: "complementação topográfica", any: ["topograf"]}
+      - {label: "complementação da DUP", any: ["complement\\w* d[aeo] documentacao de utilidade publica"]}
+      - {label: "DUP", any: ["\\bdup\\b", "utilidade publica"]}
+      - {label: "eventograma", any: ["eventograma"]}
+      - {label: "interferência em faixa de domínio", any: ["faixa de dominio"]}
+      - {label: "pavimentação", any: ["pavimenta"]}
+      - {label: "drenagem", any: ["drenagem"]}
+      - {label: "terraplenagem", any: ["terraplenagem"]}
+      - {label: "sinalização", any: ["sinaliza"]}
+      - {label: "paisagismo", any: ["paisagismo"]}
+      - {label: "desapropriação", any: ["desapropria"]}
+      - {label: "interferência de iluminação e rede elétrica", any: ["iluminacao", "rede eletrica"]}
+      - {label: "projeto geométrico", any: ["geometric"]}
+    evidence: "ordem e rótulos reproduzem o nº 12 (10/10 temas); nº 14 aprovado na revisão: 'complementação da DUP'"
+  meetings:                                      # P2.1_MEETINGS_LIST (content_blocks) quando inputs.meetings_agenda falta
+    weekday_from: {product: "2.1", prefix: AT, description_regex: "^reuniao de alinhamento tecnico"}
+    weekday_plural: [segundas, terças, quartas, quintas, sextas, sábados, domingos]
+    article_by_prefix: {"Consórcio": "o"}        # senão default_article: 'o Consórcio TETRA ENGEX', 'a DELTA'
+    default_article: "a"
+    pending_marker: "[PENDENTE]"

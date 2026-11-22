@@ -1,0 +1,475 @@
+# Especificação implementável dos blocos DATA_DRIVEN/TEMPLATE do Produto 2.4 (agente O, 2026-10-01)
+# Escopo: P2.4_RM, P2.4_NC, P2.4_ATAS, P2.4_BM_LEAD/LIST, P2.4_PARECERES_MEDICAO(_2), P2.4_RI,
+#         P2.4_LIC_LEAD/LIST, P2.4_LAU_LEAD/LIST, P2.4_PARECERES_AMB, P2.4_RCA_HEAD/LIST, P2.4_RA.
+# Fora: P2.4_RO_PERIODO/P2.4_RO_LIST (agente D) e painéis gráficos (agente L).
+# Prova executável: tmp/agent_O/o04_render_compare.py (renderiza pela spec e compara com o texto real
+#   extraído por J em tmp/agent_J/blocks_{11..14}.json); resultado em tmp/agent_O/compare_results.json.
+# Fontes lidas (todas locais, read-only, download já autorizado na Fase 3):
+#   Lista Mestra v335.0 (nº 14 e nº 11–13), v134.0 (nº 13), extratos do agente B
+#   (tmp/agent_B/snapshots/v258.0=nº11, v266.0=nº12, v289.0=nº13, v310.0=nº14), DOCX/PDF nº 11–14.
+
+version: 0.1
+status: CANDIDATE
+
+common:
+  query: |
+    from prog_g2_report.sources import master_list as ml
+    rows = ml.select(ml.load(path), N, '2.4')   # ordem física, todas as linhas (ocultas incluídas)
+  snapshots:
+    "2026-08": tmp/historical_sources/lista_mestre_v335.0.xlsx   # validado (H)
+    "2026-07": tmp/historical_sources/lista_mestre_v134.0.xlsx   # 2ª coluna = "Parecer" (já mapeado)
+    validated_against: {"2026-07": "134.0", "2026-08": "335.0"}
+    golden_test: {"2026-07": "162.0", "2026-08": "331.0"}   # DEC-012 (CreationDate do PDF)
+    dec012_note: >-
+      Gate B: esta spec foi VALIDADA contra v335 (agosto) e v134 (julho), que não são os snapshots de
+      publicação. O golden test usa v331 (agosto) e v162 (julho), DEC-012. Na v162 as 6 linhas BM
+      'Em elaboração' do nº 13 (RD-102A e RD-104, BM-007..009.1) existem com N=13: o BM_LIST continua
+      igual (filtro de status) e o P2.4_BM_EM_ELABORACAO passa a ser inteiramente derivável.
+    note: >-
+      Para estes blocos, v134.0 e v335.0 produzem saída idêntica no nº 13: a única diferença entre as
+      duas no 2.4 do nº 13 são 3 BM da RD-102A com Status Entrega "Em elaboração" (v134), neutralizados
+      pelo filtro de status do BM_LIST. Os blocos deste arquivo são robustos ao snapshot de julho.
+  manifestation_match: >-
+    comparar Manifestação normalizada (casefold, sem acento, espaços colapsados, strip). Necessário:
+    'Relatório de inspeção do alojamento ' tem espaço final; 'Notificação de Não/não Conformidade'
+    tem duas grafias (anomalies.jsonl LISTA_MESTRA_GRAFIA_MANIFESTACAO).
+  highway_display: "Empreendimento.strip().upper() ('RD-102a' -> 'RD-102A'); 'Geral' nunca aparece nestes blocos"
+  code_sort_key: "(int(seq), int(rev)) de 'XX-007.1' -> (7, 1)"
+  join_pt: "1 item: 'A'; 2+: 'A, B e C' (sem vírgula de Oxford)"
+  numerals:
+    feminine: {1: uma, 2: duas, 3: três, 4: quatro, 5: cinco, 6: seis, 7: sete, 8: oito, 9: nove, 10: dez}
+    masculine: {1: um, 2: dois, others: igual ao feminino}
+  highway_orders:
+    ORDER_RO: [RD-103, RD-102A, RD-101, RD-104]       # RA (nº 13–14, 8/8 itens); igual ao RO_INTRO
+    ORDER_ALPHA: [RD-101, RD-102A, RD-103, RD-104]    # BM (nº 11–14), LAU (nº 11–14), NC (nº 13)
+    ORDER_GAMB: [RD-102A, RD-103, RD-104, RD-101]    # RCA (nº 11–12 com 4 itens); igual ao GAMB
+    note: >-
+      Ordem por bloco é constante de modelo, não ordem física da Lista Mestra (física refutada em RA:
+      104,102A,103,101; em NC nº 13: 104 antes de 103). Exceção: RM usa a ordem física dentro do grupo.
+  numbering:
+    numId_29:   # abstractNum muda de id em cada DOCX (36/36/37/39): o builder define o seu
+      lvl0: {numFmt: bullet, lvlText: "U+F0B7 (Symbol)", ind_left: 720, hanging: 360}
+      lvl1: {numFmt: lowerLetter, lvlText: "%2)", ind_left: 1440, hanging: 360}
+      lvl2: {numFmt: bullet, lvlText: "U+F0B7", ind_left: 2160, hanging: 360}
+    numId_47:
+      lvl0: {numFmt: lowerLetter, lvlText: "%1)", ind_left: 720, hanging: 360}
+      lvl1: {numFmt: upperRoman, lvlText: "%2.", ind_left: 1440, hanging: 360}
+      lvl2: {numFmt: lowerRoman, lvlText: "%3.", ind_left: 2160, hanging: 180}
+    style: PargrafodaLista
+    restart: >-
+      lvl1 reinicia a cada item de lvl0 (PDF nº 13/14: I., II., III. por rodovia). lvl0 de numId 47
+      continua entre a lista de BM realizados e a de BM em elaboração no nº 13 (d), e)): artefato de
+      reutilizar o mesmo numId; o builder deve usar uma instância <w:num> nova por lista (restart),
+      inclusive para o RA (numId 29 lvl1), para garantir que comece em 'a)'.
+    evidence: numbering.xml dos 4 DOCX (o03_numbering.py) + texto dos PDFs nº 13 e nº 14
+
+blocks:
+- block_id: P2.4_RM
+  class: DATA_DRIVEN
+  position: após P2.4_RO_LIST
+  style: Normal
+  query: "rows where Manifestação == 'Relatório Mensal'"
+  grouping: "por Documento (código RM); grupos em ordem crescente de código; rodovias dentro do grupo na ordem física da Lista Mestra"
+  template: >-
+    Foram emitidos, ainda, os **Relatórios Mensais de Acompanhamento de Obras** referentes às rodovias
+    acompanhadas no período, sendo {rm_groups}, os quais {rm_weekly_clause}atualizam o acompanhamento
+    técnico das frentes de serviço e apresentam a situação das principais ocorrências, avanços,
+    pendências e não conformidades de cada empreendimento.
+  slots:
+    rm_groups: "join_pt(group_text for group)"
+    group_text:
+      one_highway: "o {rm_code} referente à {highway}"
+      many_highways: "os {rm_code} referentes às rodovias {join_pt(highways)}"
+    # Cláusula condicional (revisor W4, MINOR 1): a frase só afirma que os RM consolidam os
+    # relatórios semanais se houver RO (família `trigger_family`) no 2.4 do relatório. nº 12–14
+    # sempre com RO (value_if_true = texto observado); sem RO nunca observado: a cláusula sai.
+    rm_weekly_clause:
+      trigger_family: RO
+      value_if_true: "consolidam as informações registradas nos relatórios semanais, "
+      value_if_false: ""
+      confidence: HIGH
+  bold: ["Relatórios Mensais de Acompanhamento de Obras"]
+  presence: "existe ≥1 linha RM (padrão desde nº 12)"
+  reproduction:
+    nº14: "1/1 exato (RM-011.1 RD-104; RM-012.1 RD-101, RD-103, RD-102A)"
+    nº13: "1/1 exato (v335 e v134)"
+    nº12: "1/1 exato"
+    nº11: "TRUE_CHANGE: 4 RM na Lista Mestra e nenhuma frase (bloco nasce no nº 12, junto com o RO_INTRO no plural)"
+  confidence: HIGH
+  open: "grupo de rodovias em ordem física vs. ordem fixa RD-101, RD-103, RD-102A: indistinguível em 3 meses"
+
+- block_id: P2.4_NC
+  class: TEMPLATE
+  position: após P2.4_RM
+  style: Normal
+  query:
+    nc: "Manifestação ~ 'Notificação de não conformidade' (normalizada)"
+    rnc: "Manifestação == 'Relatório de Não Conformidade'"
+  template: "{nc_base}{nc_enum_sentence}{rnc_sentence}"
+  slots:
+    nc_base: >-
+      As notificações de não conformidade podem ser consultadas {nc_weekly_clause}nos relatórios
+      mensais, que compilam e atualizam, de forma acumulada, a situação das não conformidades desde o
+      início das obras.
+    # Cláusula condicional (revisor W4, MINOR 1): só cita os relatórios semanais com RO no 2.4 do
+    # relatório (nº 11–14 sempre com RO: value_if_true reproduz o texto); sem RO, a cláusula sai.
+    nc_weekly_clause:
+      trigger_family: RO
+      value_if_true: "nos relatórios semanais, os quais consolidam os apontamentos referentes a cada trecho, bem como "
+      value_if_false: ""
+      confidence: HIGH
+    nc_enum_sentence:
+      presence: "len(nc) ≤ enumerate_max — DECISÃO EDITORIAL, LOW (agente C)"
+      confidence: LOW           # gatilho LOW (editorial), formato MEDIUM (P2.4_NC.confidence)
+      enumerate_max: 4   # único default = g2_report_model.yaml editorial_defaults.nc_enumeration (up_to_4); reproduz 4/4 meses (nº 11–14)
+      text: " No período de referência, foram emitidas as Notificações de Não Conformidade {nc_groups}{nc_nature_clause}."
+      nc_groups: >-
+        por rodovia em ORDER_ALPHA; códigos em ordem crescente; grupo = "**{join_pt(codes)}**,
+        {referente|referentes} à {highway}"; grupos 2..n prefixados por ", e a " (1 código) ou ", e as "
+        (2+ códigos). >2 grupos: não observado (UNKNOWN; sugerir join com ', ' e ', e a').
+      # formas emitidas (nº 12–13); lidas por render.p24_text.render_nc
+      group_forms:
+        one_code: "**{codes}**, referente à {highway}"
+        many_codes: "**{codes}**, referentes à {highway}"
+        next_one_code: ", e a "
+        next_many_codes: ", e as "
+      nc_nature_clause:
+        class: AI_SYNTHESIS (opcional)
+        observed_nº12: ", relacionadas a ocorrências de natureza de obra, especialmente vinculadas ao controle tecnológico do concreto, acompanhamento de concretagem e execução de estruturas de drenagem"
+        source: "natureza = Descrição 'Notificação de Natureza {X}'; o resto é síntese do conteúdo da NC"
+        observed_nº13: "ausente"
+    rnc_sentence:
+      presence: "existe ≥1 RNC"
+      confidence: MEDIUM        # P2.4_NC.confidence.rnc (1 trecho nunca observado)
+      text: " Além do Relatório Consolidado de Gestão das Não Conformidades (RNC) referente aos {n_rnc_highways_masc} trechos."
+      n_rnc_highways_masc: "numeral masculino de len(distinct Empreendimento das RNC); nº 14 = quatro"
+      note: "1 trecho: não observado (UNKNOWN). Frase é fragmento sem verbo no original; mantida."
+      # forma de 1 trecho (nunca observada; texto provisório, bloco PENDING_HUMAN): troca o
+      # trecho `plural_part` do texto por `singular_part`
+      single_highway: {plural_part: "aos {n_rnc_highways_masc} trechos", singular_part: "ao trecho {highway}"}
+  bold: ["códigos NC do enum (nº 12, nº 13)"]
+  reproduction:
+    nº14: "padrão: 0/1 por anomalia; as-observed (base truncada + 'Consolidade'): 1/1 exato — só medição, NUNCA o texto emitido. RNC clause derivada: 4 RNC, 4 trechos"
+    nº13: "padrão: 0/1 por anomalia (base truncada); enum 'NC-525.1, referente à RD-103, e a NC-525.1, referente à RD-104' exato"
+    nº12: "base + enum exatos; difere só pela nature_clause (AI)"
+    nº11: "TRUE_CHANGE: 'no relatório mensal, que compila e atualiza' (singular); 25 NC, sem enum (consistente com limiar)"
+  divergences:
+    anomaly: "nº 13–14 base truncada e 'Consolidade' (anomalies.jsonl P2.4_RELATORIO_CONSOLIDADO_GRAFIA, should_learn=false)"
+  confidence: {base: CONFIRMED, enum_format: MEDIUM, enum_trigger: LOW, rnc: MEDIUM}
+
+- block_id: P2.4_ATAS
+  class: TEMPLATE com presença derivada e temas por palavra-chave
+  position: após P2.4_NC
+  query: "Manifestação == 'Ata de Reunião'"
+  text: >-
+    Encaminham-se, ainda, as atas de reunião referentes ao acompanhamento realizado pela equipe técnica
+    junto às empresas executoras{themes}.
+  slots:
+    # QA2-C (Gate D, 2ª rodada): a frase fixa dos nº 12–14 atribuía às atas dez temas que nenhuma
+    # AT do 2.4 sustenta — a Descrição de todas é 'Reunião de alinhamento da obra e acompanhamento
+    # dos serviços' (nº 14: AT-676.1, AT-677.1; anomalia P2.4_ATAS_TEMAS_SEM_SUPORTE). Cada tema só
+    # sai com AT do 2.4 cuja Descrição normalizada casa `any` (regex), na ordem do texto observado.
+    # Nenhum tema sustentado: fica só a moldura factual (presença de AT + acompanhamento junto às
+    # executoras), a mesma do nº 11 com o 'ainda' do padrão nº 12–14 (`required: false`).
+    # `lead` carrega a abertura ', contemplando as tratativas de' (só existe com tema).
+    themes:
+      fills: [config/data_rules/p24_blocks.yaml#P2.4_ATAS/text, config/g2_content_blocks.yaml#P2.4_ATAS]
+      family: AT
+      required: false
+      empty: ""
+      join: {after_first: ", ", pair_sep: " e ", rest_sep: ", ", rest_last_sep: " e "}
+      confidence: MEDIUM
+      themes:
+        - {label: "avanço físico", lead: ", contemplando as tratativas de avanço físico", follow: "avanço físico", bare: "avanço físico", any: ["avanco fisico"]}
+        - {label: "qualidade dos serviços", lead: ", contemplando as tratativas de qualidade dos serviços", follow: "qualidade dos serviços", bare: "qualidade dos serviços", any: ["qualidade"]}
+        - {label: "pendências documentais", lead: ", contemplando as tratativas de pendências documentais", follow: "pendências documentais", bare: "pendências documentais", any: ["pendencias? document"]}
+        - {label: "controle tecnológico", lead: ", contemplando as tratativas de controle tecnológico", follow: "controle tecnológico", bare: "controle tecnológico", any: ["controle tecnolog"]}
+        - {label: "licenciamento ambiental", lead: ", contemplando as tratativas de licenciamento ambiental", follow: "licenciamento ambiental", bare: "licenciamento ambiental", any: ["licenc"]}
+        - {label: "segurança do trabalho", lead: ", contemplando as tratativas de segurança do trabalho", follow: "segurança do trabalho", bare: "segurança do trabalho", any: ["seguranca do trabalho", "\\bsst\\b"]}
+        - {label: "planejamento das frentes de serviço", lead: ", contemplando as tratativas de planejamento das frentes de serviço", follow: "planejamento das frentes de serviço", bare: "planejamento das frentes de serviço", any: ["frentes? de servico", "planejamento"]}
+        - {label: "medições", lead: ", contemplando as tratativas de medições", follow: "medições", bare: "medições", any: ["medicao", "medicoes"]}
+        - {label: "eventogramas", lead: ", contemplando as tratativas de eventogramas", follow: "eventogramas", bare: "eventogramas", any: ["eventograma"]}
+        - {label: "acompanhamento das ocorrências registradas em campo", lead: ", contemplando as tratativas de acompanhamento das ocorrências registradas em campo", follow: "acompanhamento das ocorrências registradas em campo", bare: "acompanhamento das ocorrências registradas em campo", any: ["ocorrencia"]}
+  presence: "existe ≥1 AT no 2.4 (nº 11=13, nº 12=16, nº 13=15, nº 14=2 AT; nunca falso na janela)"
+  reproduction:
+    nº14: "moldura 1/1; temas sem AT que os sustente (anomalia P2.4_ATAS_TEMAS_SEM_SUPORTE)"
+    nº13: "idem (15 AT, todas 'Reunião de alinhamento da obra e acompanhamento dos serviços')"
+    nº12: "idem (16 AT com a mesma Descrição)"
+    nº11: "TRUE_CHANGE (frase curta, sem 'ainda'): é a moldura emitida sem tema"
+  confidence: {text: CONFIRMED, presence: HIGH, themes: MEDIUM}
+
+- block_id: P2.4_BM_LEAD
+  class: FIXED_TEXT
+  text: "Foram realizadas as medições dos seguintes meses de cada obra:"
+  presence: "BM_LIST não vazio"
+  confidence: CONFIRMED
+
+- block_id: P2.4_BM_LIST
+  class: DATA_DRIVEN
+  position: após P2.4_BM_LEAD
+  query: "Manifestação == 'Boletim de Medição' AND Status Entrega (normalizado) == 'entregue'"
+  status_filter_evidence: >-
+    v134.0 nº 13 tem BM-007.1/008.1/009.1 da RD-102A com N=13 e Status 'Em elaboração': no DOCX eles NÃO
+    estão em "Foram realizadas" e SIM em "permanecem em elaboração". Sem o filtro o bloco erra; com ele
+    v134 e v335 dão a mesma lista. (Data Entrega vazia no nº 12 com Status 'Entregue': o filtro é o status, não a data.)
+  grouping: "por rodovia em ORDER_ALPHA; dentro do grupo, código crescente"
+  template:
+    highway_item: {numId: 47, ilvl: 0, text: "{highway}:", bold: false}
+    bm_item: {numId: 47, ilvl: 1, text: "{bm_code} - Referente a {bm_month_label}{terminator}"}
+  slots:
+    bm_month_label: "Descrição sem o prefixo 'Boletim de Medição de ' (ex.: 'Abril/2026')"
+    terminator: "';' nos itens; '.' no último item de cada rodovia"
+    separator: "' - ' (hífen U+002D com espaços) — padrão nº 12 e nº 14; nº 13 mistura '–'; nº 11 só '–'"
+  rendered_nº14: ["a) RD-104:", "I. BM-007.1 - Referente a Abril/2026;", "II. BM-008.1 - Referente a Maio/2026;", "III. BM-009.1 - Referente a Junho/2026."]
+  reproduction:
+    nº14: "4/4 exato"
+    nº13: "7/16 exato; 13/16 normalizando '–'→'-'; 3 divergências = códigos RD-103 (texto BM-004.1/005.1/006.1, LM BM-007.1/008.1/009.1; meses 4/4 corretos)"
+    nº12: "12/12 exato"
+    nº11: "meses 9/9; códigos no formato abreviado 'BM-01' (HISTORICAL_PATTERN); 'Outubro /2025' (TYPO); último item ';'"
+  divergences:
+    anomaly_copy_forward: "nº 13 RD-103: códigos do nº 12 com meses atualizados + BM-010.1 apendado com '.' duplo de fim de grupo (COPY_FORWARD_ERROR, HIGH; já candidato em J)"
+    anomaly_typo: "nº 13 separador misto '-'/'–'"
+    historical: "nº 11 código abreviado sem revisão"
+  confidence: {selection: CONFIRMED, order: HIGH, separator: HIGH}
+  adjacent_note: >-
+    P2.4_BM_EM_ELABORACAO (componente P2.4_BM_IN_PROGRESS, MANUAL_INPUT opcional) tem default derivado:
+    linhas BM do relatório com Status Entrega diferente de 'Entregue', na mesma forma do BM_LIST
+    (ORDER_ALPHA, código crescente, instância de lista nova). Prova: na v162 (snapshot DEC-012 do nº 13)
+    as linhas 'Em elaboração' são exatamente os 6 itens do texto (RD-102A e RD-104, BM-007.1..009.1).
+    A leitura antiga (RD-104 ausente da v134.0 → entrada externa) era do snapshot errado. A entrada
+    humana (inputs.p24_bm_in_progress) só acrescenta itens externos.
+
+- block_id: P2.4_PARECERES_MEDICAO
+  class: TEMPLATE com presença e temas derivados
+  text: >-
+    Em complementação às medições subsequentes e ao acompanhamento da documentação de suporte das
+    obras, foram emitidos pareceres técnicos referentes {themes}, dos boletins de medição processados.
+  slots:
+    # Cada tema só sai com PA do 2.4 cuja Descrição normalizada contém uma das palavras de `any`.
+    # Formas: `lead` logo após 'referentes' (com a preposição), `follow` 1º tema depois de
+    # `join.after_first`, `bare` os demais. nº 13 (os 3 temas) = frase observada; nº 14 (sem PA de
+    # ateste) deixa de citar o Ateste (anomalia P2.4_PARECERES_MEDICAO_ATESTE_SEM_PA).
+    themes:
+      fills: [config/data_rules/p24_blocks.yaml#P2.4_PARECERES_MEDICAO/text, config/g2_content_blocks.yaml#P2.4_PARECERES_MEDICAO]
+      family: PA
+      join: {after_first: ", assim como ", rest_sep: ", ", rest_last_sep: " e "}
+      confidence: MEDIUM
+      themes:
+        - {label: "Análise e Consolidação do Controle Tecnológico e Topográfico", lead: "à Análise e Consolidação do Controle Tecnológico e Topográfico", follow: "a Análise e Consolidação do Controle Tecnológico e Topográfico", bare: "Análise e Consolidação do Controle Tecnológico e Topográfico", any: ["controle tecnolog"]}
+        - {label: "Ateste de Documentação do Processo de Medição", lead: "ao Ateste de Documentação do Processo de Medição", follow: "o Ateste de Documentação do Processo de Medição", bare: "Ateste de Documentação do Processo de Medição", any: ["ateste"]}
+        - {label: "Eventos medidos aderentes ao Eventograma aprovado", lead: "aos Eventos medidos aderentes ao Eventograma aprovado", follow: "os Eventos medidos aderentes ao Eventograma aprovado", bare: "Eventos medidos aderentes ao Eventograma aprovado", any: ["eventograma"]}
+  presence: "existe PA no 2.4 cuja Descrição normalizada contém 'controle tecnolog' OR 'eventograma' OR 'ateste'"
+  presence_evidence: "nº 14: PA-691..693, 711..713 (controle), 208/216/235 (eventograma); nº 13: os três tipos"
+  reproduction: {nº14: "moldura 1/1; tema do Ateste sem PA (anomalia)", nº13: "1/1 (nº 13 termina com '..': TYPO)"}
+  confidence: {text: CONFIRMED, presence: MEDIUM, themes: MEDIUM}
+
+- block_id: P2.4_PARECERES_MEDICAO_2
+  class: TEMPLATE com presença derivada e temas por palavra-chave
+  text: >-
+    Os documentos contemplam a análise {themes} relacionados à execução das obras, com destaque para
+    {highlight}verificação dos controles apresentados pela executora e supervisora.
+  slots:
+    # QA2-C (Gate D, 2ª rodada): a frase fixa dos nº 13–14 afirmava controles geotécnicos e
+    # 'destaque para as atividades de obras de arte corrente' sem nenhum PA do 2.4 com esses temas
+    # na Descrição (anomalia P2.4_PARECERES_MEDICAO_2_TEMAS_SEM_SUPORTE). Mesma regra do
+    # P2.4_PARECERES_MEDICAO: cada tema só com PA do 2.4 que o sustente. `themes` = o que os
+    # documentos analisam (obrigatório: sem nenhum, o parágrafo não se aplica e sai SKIPPED);
+    # `highlight` = destaque opcional (sem PA de OAC: 'com destaque para a verificação…').
+    # Ensaios laboratoriais e controles tecnológicos andam juntos (o controle tecnológico é o
+    # conjunto dos ensaios), mesma palavra-chave.
+    themes:
+      fills: [config/data_rules/p24_blocks.yaml#P2.4_PARECERES_MEDICAO_2/text, config/g2_content_blocks.yaml#P2.4_PARECERES_MEDICAO_2]
+      family: PA
+      when_unsupported: SKIPPED
+      join: {after_first: ", ", pair_sep: " e ", rest_sep: ", ", rest_last_sep: " e "}
+      confidence: MEDIUM
+      themes:
+        - {label: "ensaios laboratoriais e controles tecnológicos", lead: "dos ensaios laboratoriais, controles tecnológicos", follow: "ensaios laboratoriais, controles tecnológicos", bare: "ensaios laboratoriais, controles tecnológicos", any: ["controle tecnolog", "ensaios? laborat"]}
+        - {label: "controles topográficos", lead: "dos controles topográficos", follow: "topográficos", bare: "topográficos", any: ["topograf"]}
+        - {label: "controles geotécnicos", lead: "dos controles geotécnicos", follow: "geotécnicos", bare: "geotécnicos", any: ["geotecn"]}
+    highlight:
+      fills: [config/data_rules/p24_blocks.yaml#P2.4_PARECERES_MEDICAO_2/text, config/g2_content_blocks.yaml#P2.4_PARECERES_MEDICAO_2]
+      family: PA
+      required: false
+      empty: "a "
+      join: {after_first: ", ", pair_sep: " e ", rest_sep: ", ", rest_last_sep: " e "}
+      confidence: MEDIUM
+      themes:
+        - {label: "atividades de obras de arte corrente", lead: "as atividades de obras de arte corrente e ", follow: "atividades de obras de arte corrente e ", bare: "atividades de obras de arte corrente e ", any: ["obras? de arte corrente", "\\boac\\b"]}
+  presence: "igual a P2.4_PARECERES_MEDICAO"
+  reproduction:
+    nº14: "moldura 1/1; geotécnicos e obras de arte corrente sem PA (anomalia P2.4_PARECERES_MEDICAO_2_TEMAS_SEM_SUPORTE)"
+    nº13: "idem (PA de controle tecnológico e topográfico; nenhum geotécnico nem de OAC)"
+  confidence: {text: CONFIRMED, presence: MEDIUM, themes: MEDIUM}
+
+- block_id: P2.4_RI
+  class: DATA_DRIVEN
+  position: após P2.4_PARECERES_MEDICAO_2, seguido de 1 parágrafo vazio
+  query: "Manifestação normalizada começa com 'relatorio de inspecao do alojamento'"
+  template: "Foram realizadas inspeções nos alojamentos das {n_highways_fem} rodovias, conforme apresentado nos Relatórios de inspeção do alojamento **{ri_first} a {ri_last}.**"
+  slots:
+    n_highways_fem: "numeral feminino de len(distinct Empreendimento)"
+    ri_first_ri_last: "menor e maior código (code_sort_key)"
+  bold: ["'{ri_first} a {ri_last}.' (inclui o ponto final)"]
+  unobserved: "1 rodovia ('da rodovia X'); códigos não contíguos (faixa esconderia lacuna) → validar contiguidade e falhar/listar"
+  # forma de 1 rodovia (nunca observada; texto provisório, bloco PENDING_HUMAN)
+  single_highway: {plural_part: "das {n_highways_fem} rodovias", singular_part: "da rodovia {highway}"}
+  presence: "existe ≥1 RI (padrão desde nº 13)"
+  reproduction: {nº14: "1/1 exato (RI-509.1 a RI-512.1)", nº13: "1/1 exato (RI-505.1 a RI-508.1)", nº12: "TRUE_CHANGE: 4 RI na LM, sem frase"}
+  confidence: HIGH
+
+- block_id: P2.4_LIC_LEAD
+  class: TEMPLATE
+  source: "04_Acompanhamento - Licenca Ambiental.xlsx (item 01EXEMPLOITEMID000000000000000000), aba Licenças, cab. linha 2, TODAS as linhas; versão = última com lastModified <= 'Atualizado em' do painel (agente B)"
+  query: "pending = rows where Status == 'Aguardando a liberação'"
+  template: "Conforme pode ser observado na imagem a seguir, encontram-se pendentes {n_pending_fem} licenças, a saber:"
+  style: "Normal, jc=left (colado de HTML no original; reproduzir alinhamento)"
+  reproduction: {nº14: "1/1 (oito)", nº13: "1/1 (oito)", nº12: "1/1 (oito)", nº11: "1/1 (sete)"}
+  unobserved: "n=0 ('não há licenças pendentes'?) e n=1 ('uma licença') → UNKNOWN, decisão editorial"
+  confidence: {count: CONFIRMED, text: HIGH}
+
+- block_id: P2.4_LIC_LIST
+  class: DATA_DRIVEN
+  style: "PargrafodaLista numId 29 lvl0 (•)"
+  grouping: "pending por rodovia (Empresa → rodovia pela aba Empresas); rodovias sem pendência omitidas"
+  order: "contagem crescente (nº 11: 1,2,4; nº 12–14: 1,2,5); desempate por ORDER_GAMB. Indistinguível de ordem fixa [RD-102A, RD-104, RD-103]"
+  template:
+    single_phase: "**{highway}:** {n_fem} licença{s} referente à {phase_label}{terminator}"
+    multi_phase: "**{highway}:** {n_fem} licenças/autorização aguardando liberação, sendo {join_pt(k_fem + ' ' + referente(s) + ' à ' + phase_label_multi, por fase em contagem decrescente)}{terminator}"
+    terminator: "';' exceto o último item '.'"
+    # parte de cada fase do multi_phase (k = numeral feminino da contagem da fase)
+    phase_part: {one: "{k_fem} referente à {phase_label}", many: "{k_fem} referentes à {phase_label}"}
+    # standardize=True (DEC-007, decisão editorial): concordância do single_phase com n > 1
+    standardized_plural: {observed: " referente à ", standard: " referentes à "}
+  phase_label:   # Fase da licença → rótulo; DICIONÁRIO DE MODELO (não é texto da planilha)
+    "Licença Ambiental - Canteiro de obra": "licença ambiental do canteiro de obras"
+    "Outorga de uso de recurso hídrico": "outorga de uso de recursos hídricos"
+    "Licença Ambiental - Usina": "licença ambiental da usina"
+    "Licença de Instalação e Operação": "licença de instalação e operação"
+  phase_label_multi_variant:
+    "Outorga de uso de recurso hídrico": "outorga de uso de recurso hídrico"   # verbatim do nº 12–14
+  reproduction:
+    nº14: "3/4 com rótulo único; 4/4 com a variante multi-fase"
+    nº13: "idem (dados idênticos v289/v310 para licenças pendentes)"
+    nº12: "idem"
+    nº11: "2/3 itens; RD-103 em forma antiga 'quatro licenças sendo três referentes à ... e uma licença de instalação e operação.' (TRUE_CHANGE no nº 12)"
+  divergences:
+    resolved_question: "Texto idêntico nº 12–14 (J perguntava copy-forward?) = ESTABILIDADE REAL: as 8 linhas pendentes são as mesmas em v266, v289, v310"
+    editorial: "'duas licenças referente' (concordância) e 'recurso hídrico'/'recursos hídricos' na mesma lista → DEC-007; o default reproduz o observado"
+  confidence: {selection: CONFIRMED, order: MEDIUM, wording: MEDIUM}
+
+- block_id: P2.4_LAU_LEAD
+  class: TEMPLATE
+  source: "mesma planilha, aba Condicionantes (cab. linha 2, A:L), TODAS as linhas (incl. ocultas pelo autofiltro); Status RECALCULADO com data de referência = 'Atualizado em' do painel (regra do agente B), nunca o cache"
+  template: "Conforme pode ser observado nas imagens a seguir, {lau_status_clause}. Dessa forma, tem-se:"
+  slots:
+    lau_status_clause:
+      "pendentes == 0 and proximas == 0": "não há condicionantes pendentes ou próximas ao vencimento no período de referência"
+      "pendentes == 0 and proximas > 0": "não há condicionantes pendentes no período de referência"
+      "pendentes > 0": "UNKNOWN — nunca observado coerentemente; MANUAL_INPUT/decisão"
+  reproduction: {nº14: "1/1", nº13: "1/1", nº12: "1/1", nº11: "0/1 — anomalia P2.4_LAU_TEXTO_CONTRADITORIO"}
+  confidence: MEDIUM
+
+- block_id: P2.4_LAU_LIST
+  class: DATA_DRIVEN
+  style: "PargrafodaLista numId 29 lvl0 (•); cada item seguido de 1 parágrafo com o painel da rodovia (agente L)"
+  order: ORDER_ALPHA (4/4 meses)
+  presence: "sempre as 4 rodovias da aba Empresas"
+  template: "**{highway}:** Não apresenta condicionantes em atraso{near_due_clause};"
+  slots:
+    near_due_clause:
+      "proximas == 0": ""
+      "proximas == 1": ", e apenas uma condicionante próxima ao vencimento a ser apresentada pela empresa executora"
+      "proximas > 1": ", contudo, encontram-se algumas condicionantes próximas ao vencimento a serem apresentadas pela empresa executora"
+    pendentes_gt_0: "UNKNOWN (forma nunca observada)"
+  bold: ["'{highway}:'"]
+  terminator: "';' inclusive no último (4/4 meses) — reproduzir"
+  reproduction: {nº14: "4/4 (RD-101 34, RD-102A 1, RD-103 1, RD-104 35 próximas)", nº13: "4/4", nº12: "4/4", nº11: "4/4"}
+  not_emit: "14 parágrafos PargrafodaLista vazios antes de RD-104 no nº 14 (espaçamento manual)"
+  confidence: {zero: CONFIRMED, one_and_many: MEDIUM (só nº 14)}
+
+- block_id: P2.4_PARECERES_AMB
+  class: TEMPLATE com presença e temas derivados
+  position: após P2.4_GAMB
+  slots:
+    # Mesma regra de temas do P2.4_PARECERES_MEDICAO: tema só com PA que o sustente. nº 14 não
+    # tem PA de condicionantes nem de ocorrência (anomalia P2.4_PARECERES_AMB_TEMAS_SEM_SUPORTE).
+    themes:
+      fills: [config/data_rules/p24_blocks.yaml#P2.4_PARECERES_AMB/texts, config/g2_content_blocks.yaml#P2.4_PARECERES_AMB]
+      family: PA
+      join: {after_first: ", ", rest_sep: ", ", rest_last_sep: ", "}
+      confidence: MEDIUM
+      themes:
+        - {label: "avaliação de conformidade ambiental", lead: "à avaliação de conformidade ambiental", follow: "avaliação de conformidade ambiental", bare: "avaliação de conformidade ambiental", any: ["conformidade\\b.*\\bambiental", "ambiental e sst"]}
+        - {label: "atendimento de condicionantes ambientais", lead: "ao atendimento de condicionantes ambientais", follow: "atendimento de condicionantes ambientais", bare: "atendimento de condicionantes ambientais", any: ["condicionante", "licenc"]}
+        - {label: "justificativas técnicas", lead: "às justificativas técnicas", follow: "justificativas técnicas", bare: "justificativas técnicas", any: ["justificativa"]}
+        - {label: "ocorrências ambientais", lead: "às ocorrências ambientais", follow: "ocorrências ambientais", bare: "ocorrências ambientais", any: ["ocorrencia ambiental", "ocorrencia apontada", "fauna"]}
+        - {label: "saúde e segurança do trabalho", lead: "à saúde e segurança do trabalho", follow: "saúde e segurança do trabalho", bare: "saúde e segurança do trabalho", any: ["\\bsst\\b", "seguranca do trabalho"]}
+        - {label: "conformidade de obra", lead: "à conformidade de obra", follow: "conformidade de obra", bare: "conformidade de obra", any: ["conformidade\\b.*\\bobra\\b"]}
+  texts:
+  - >-
+    Adicionalmente, no mês de referência, foram emitidos pareceres técnicos relacionados {themes} e
+    demais manifestações correlatas aos empreendimentos acompanhados.
+  - >-
+    Os pareceres emitidos tiveram como objetivo subsidiar a avaliação técnica quanto à conformidade das
+    informações apresentadas pelas empresas executoras e supervisoras, bem como orientar os
+    encaminhamentos necessários junto ao Parceiro, ao Órgão Contratante e aos demais órgãos competentes.
+  presence: "existe PA no 2.4 cuja Descrição normalizada contém 'ambiental' OR 'sst'"
+  presence_evidence: "nº 14: 20+ PA de conformidade ambiental/SST; nº 13: PA-647/656/673 (SST), PA-674 (ambiental)"
+  reproduction: {nº14: "moldura 2/2; temas sem PA (condicionantes, ocorrências) são anomalia", nº13: "2/2", nº12: "TRUE_CHANGE (detalhamento por rodovia, AI)", nº11: "TRUE_CHANGE (lista de códigos)"}
+  confidence: {text: CONFIRMED, presence: MEDIUM, themes: MEDIUM}
+
+- block_id: P2.4_RCA_HEAD
+  class: FIXED_TEXT
+  text: "Referente aos **Relatórios de Controle Ambiental:**"
+  presence: "padrão (nº 13–14): existe ≥1 RCA; nº 11–12 sempre (todas as rodovias). Sem RCA no padrão: UNKNOWN (nunca ocorreu)"
+  confidence: {text: CONFIRMED, presence: MEDIUM}
+
+- block_id: P2.4_RCA_LIST
+  class: DATA_DRIVEN
+  style: "PargrafodaLista numId 29 lvl0 (•) + letra DIGITADA '{letter}) ' no texto"
+  query: "Manifestação == 'Análise do relatório de controle ambiental'"
+  order: ORDER_GAMB (filtrada às rodovias presentes); letter = a, b, c... sequencial na lista emitida
+  template:
+    sent: "{letter}) **{highway}:** Encaminhado e analisado no período de fechamento do presente relatório, conforme **{rca_code}**, referente à Análise do Relatório de Controle Ambiental da rodovia {highway};"
+    not_sent_historical: "{letter}) **{highway}:** Não encaminhado no período de fechamento do presente relatório, último encaminhamento em {last_month_label}, conforme {last_rca_code}."
+  slots:
+    last_rca_code: "maior código RCA da rodovia com N° Relatório < N (todas as versões da Lista Mestra)"
+    last_month_label: >-
+      'Mês/AAAA' — reproduz 5/5 (nº 11 ×4, nº 12 ×1) tanto pelo mês da Data Entrega do último RCA quanto
+      pelo reference_month do relatório a que ele pertence (coincidem em todos os casos): ambíguo
+  presence:
+    current_standard: "só rodovias com RCA no relatório (TRUE_CHANGE desde nº 13)"
+    historical: "nº 11–12: as 4 rodovias, sent ou not_sent"
+  after: "1 parágrafo PargrafodaLista vazio (nº 14 idx 319) — espaçamento; não emitir"
+  reproduction:
+    nº14: "1/1 exato (RCA-513.1 RD-101)"
+    nº13: "0/1 — código e rodovia certos; final 'da rodovia RD-102A' (LM: RD-104): TYPO"
+    nº12: "4/4 de fatos no modo histórico (2 exatos + 'RD-101:Encaminhado' sem espaço + 'c)' sem ponto)"
+    nº11: "4/4 de fatos no modo histórico (not_sent com meses e códigos certos)"
+  confidence: HIGH
+
+- block_id: P2.4_RA
+  class: DATA_DRIVEN
+  query: "Manifestação == 'Relatório Ambiental Consolidado'"
+  lead: {style: Normal, text: "Adicionalmente, foram emitidos os relatórios consolidados mensais de acompanhamento ambiental:"}
+  items:
+    style: "PargrafodaLista numId 29 lvl1 (lowerLetter automática 'a)'), sem negrito"
+    order: ORDER_RO (filtrada às rodovias presentes)
+    template: "{highway}: {join_pt(ra_codes)};"
+    terminator: "';' inclusive no último (2/2 meses) — reproduzir"
+  presence: "existe ≥1 RA (primeiros RA nascem no nº 13: RA-501.1; ausência nos nº 11–12 é coerente)"
+  reproduction:
+    nº14: "3/4 exato; RD-104 sem ':' (anomalia copy-forward)"
+    nº13: "3/4 exato ('RA-501.1 e RA-507.1' etc.); RD-104 sem ':'"
+  confidence: HIGH
+
+summary_reproduction:
+  unit: "linha/parágrafo emitido (24 no nº 14, 36 no nº 13), contra o texto real"
+  nº14: {exact: "21/24 (87,5%)", with_lic_variant: "22/24 (91,7%)", residual: "2 = anomalias registradas/candidatas (NC truncada+Consolidade; RA RD-104 sem ':')", facts: "100%"}
+  nº13: {exact: "23/36 (64%)", dash_normalized_with_lic_variant: "30/36 (83%)", residual: "6 = NC truncada, 3 códigos BM RD-103 (copy-forward), RCA rodovia trocada, RA RD-104 sem dois-pontos", facts: "códigos BM RD-103 3/4 errados no original; resto 100%"}
+  classification_of_divergences:
+    rule_wrong: "nenhuma no padrão nº 13–14 (escolhas não provadas: ordem RM, ordem LIC, limiar de enum NC, mês do RCA não enviado)"
+    historical_anomaly: ["NC base truncada e 'Consolidade' (nº 13–14)", "BM RD-103 códigos copiados do nº 12 (nº 13)", "BM separador misto (nº 13)", "RCA-512.1 'rodovia RD-102A' (nº 13)", "RA 'RD-104' sem ':' (nº 13–14)", "PARECERES_MEDICAO '..' (nº 13)", "LAU lead contraditório (nº 11)", "LIC 'referente' sem plural e 'recurso hídrico' (nº 12–14, editorial)"]
+    live_spreadsheet: ["v134.0 → v335.0: 3 BM RD-102A N=13 'Em elaboração' saem do nº 13 (neutralizado pelo filtro de status)", "v134.0 tem só 14 linhas 2.4 com N=14 (julho ainda não fechara agosto)", "grafia dupla de 'Notificação de não conformidade' e espaço final em 'Relatório de inspeção do alojamento ' (normalizar)"]
+    true_change: ["RM e RO_INTRO plural a partir do nº 12", "RI a partir do nº 13", "RCA só rodovias com envio a partir do nº 13", "PARECERES_AMB/MEDICAO genéricos a partir do nº 13", "LIC multi-fase 'licenças/autorização aguardando liberação' a partir do nº 12", "BM código completo a partir do nº 12"]

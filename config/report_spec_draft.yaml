@@ -1,0 +1,150 @@
+# SUPERSEDED (Gate B, 2026-10-01): substituído por config/g2_report_model.yaml (G2_REPORT_MODEL).
+# Mantido só como registro histórico do rascunho v0.1; nenhum código ou teste lê este arquivo.
+# RASCUNHO do modelo do Relatório G2 — NÃO CERTIFICADO.
+# Só regras CONFIRMED ou HIGH_CONFIDENCE com evidência forte.
+# Fonte: docs/specs/DRAFT_SOURCE_RULES.md e docs/discovery/ANATOMY_2026-05_TO_2026-08.md
+
+model:
+  name: G2_REPORT_MODEL
+  version: 0.1-draft
+  status: CANDIDATE            # NONE -> CANDIDATE -> FROZEN -> CERTIFIED
+  evidence_window: ["2026-05", "2026-06", "2026-07", "2026-08"]
+  reference: "Relatório G2 nº 14 — Agosto/2026"
+
+page:
+  size: A4
+  width_cm: 21.0
+  height_cm: 29.7
+  header_distance_cm: 1.0
+  footer_distance_cm: 0.0
+  section_break: nextPage
+  confidence: CONFIRMED
+  sections:
+    - index: 0
+      orientation: portrait
+      margins_cm: {top: 2.0, bottom: 1.5, left: 2.0, right: 1.5}
+    - index: 1
+      orientation: landscape
+      margins_cm: {top: 2.0, bottom: 1.5, left: 1.5, right: 2.0}
+    - index: 2
+      orientation: portrait
+      margins_cm: {top: 2.0, bottom: 1.5, left: 2.0, right: 1.5}
+
+header:
+  text: "PROGRAMA | CONSÓRCIO ESTRUTURADOR DO PROGRAMA"
+  rule: "uma parte por seção; ausente na capa"
+  confidence: CONFIRMED
+
+footer:
+  left: "-CONFIDENCIAL-"
+  right_field_type: PAGE       # campo do Word, não texto digitado
+  rule: "sem numeração na capa"
+  confidence: CONFIRMED
+
+typography:
+  confidence: CONFIRMED
+  body: {font: "Arial Nova Cond", size_pt: 11}
+  body_alt: {font: "Arial Nova Light", size_pt: 11}
+  heading: {font: "Arial Nova Cond", weight: bold, size_pt: 13}
+  table_image: {font: "Arial Nova Cond", size_pt: 6.8}
+
+outline:
+  confidence: CONFIRMED
+  note: "22 títulos; ordem e estilos idênticos nos quatro meses"
+  titles:
+    - {text: "Apresentação", style: Ttulo1}
+    - {text: "gestão de engenharia e socioambiental", style: Ttulo1, note: "minúsculo no XML; a caixa alta vem do estilo"}
+    - {product: "2.1", style: Ttulo2}
+    - {product: "2.2", style: Ttulo2}
+    - {product: "2.3", style: Ttulo2}
+    - {product: "2.4", style: Ttulo2}
+    - {product: "2.5", style: Ttulo2}
+    - {product: "2.6", style: Ttulo2, page_break_before: true}
+    - {text: "ENCERRAMENTO", style: Ttulo}
+    - {text: "ANEXOS", style: Ttulo}
+  product_subsections:
+    - "Descrição das atividades atribuídas"
+    - "Produtos desenvolvidos no período"
+
+toc:
+  field_switches: ["\\o 1-3", "\\z", "\\u", "\\h"]
+  location: "bloco SDT no início do documento"
+  requires_word_to_update: true
+  confidence: CONFIRMED
+
+selection:
+  source: "Lista Mestra, aba 'Controle Geral'"
+  rule: "N° Relatório == report_number"
+  forbidden: "filtrar por data de entrega, status, empresa ou linha oculta"
+  order: "ordem física da linha na planilha; NUNCA aplicar ORDER BY"
+  order_evidence: "100% de cerca de 17 mil pares ordenados; data acerta 94%, código 69%"
+  confidence: CONFIRMED
+
+control_of_products:
+  columns: [Documento, Manifestação, Descrição, Empreendimento, "Data Entrega", "Status Entrega"]
+  representation: EMF          # metarquivo vetorial vindo do Excel
+  width_cm: 17.5
+  confidence: CONFIRMED
+  blocker: "GAP-001 (P0): como gerar o EMF sem abrir o Excel à mão"
+  blocks:
+    - where: "dentro do produto 2.X"
+      filter: "N° Relatório == N AND Produto começa com 2.X"
+    - where: "índice consolidado em ANEXOS"
+      filter: "N° Relatório == N"
+  august_counts: {"2.1": 3, "2.2": 48, "2.4": 98, anexos: 149}
+
+annexes:
+  path_pattern: "/G2/Anexos/<Produto>/<Tipo>/<Rodovia>/<arquivo>"
+  rule: "uma linha da Lista Mestra vira um anexo; pode ser arquivo ou pasta com peças"
+  type_renaming: true          # o nome da pasta não é o valor da coluna
+  nota_tecnica_split_by: "Descrição (Aceitação × Análise)"
+  confidence: CONFIRMED
+
+closing:
+  page_count: "contagem de páginas do PDF final, por extenso entre parênteses"
+  annex_count: "COUNT de linhas da Lista Mestra do relatório"
+  signature_date: "manual; mês seguinte ao de referência"
+  cover_date: "campo independente da data de assinatura; nunca coincidem"
+  confidence: CONFIRMED
+
+static_text:
+  confidence: CONFIRMED
+  contract_quote:
+    class: SOURCE_VERBATIM     # DEC-007: preservar literalmente
+    evidence: "24 de 24 blocos idênticos byte a byte"
+  no_activity_sentence:
+    text: "No período de referência do presente relatório não houve atividades relacionadas ao produto 2.X."
+    condition: "produto sem documento na Lista Mestra do relatório"
+    evidence: "12 de 12 ocorrências idênticas"
+  table_call_sentence:
+    text: "A relação dos produtos desenvolvidos no período se encontra na tabela apresentada a seguir."
+    occurrences_per_report: 3
+
+static_assets:
+  confidence: CONFIRMED
+  note: "reutilizar; nunca regerar por código ou IA"
+  landscape_block: {pages: 8, size_cm: [26.2, 14.74], stable_sha1_across_months: 6}
+  presentation_logo: {size_cm: [16.04, 5.19]}
+  p22_predecessor_diagram: {format: EMF, size_cm: [15.22, 11.83]}
+
+historical_reconstruction:
+  master_list: "snapshot da versão vigente na data de emissão (DEC-008)"
+  criterion: "última versão com lastModifiedDateTime <= fim do dia da emissão"
+  validated: ["2026-07", "2026-08"]
+  not_validatable: ["2026-05", "2026-06"]
+  reason: "o histórico do SharePoint começa em 2026-07-20"
+  confidence: CONFIRMED
+
+standardization:
+  decision: DEC-007
+  source_verbatim: "citação de contrato ou termo de referência: preservar exatamente"
+  generated_text: "texto do relatório: corrigir e padronizar"
+
+unresolved:
+  # NÃO implementar nada daqui
+  - {id: GAP-001, item: "geração do EMF do Controle de Produtos", priority: P0}
+  - {id: GAP-002, item: "capa (objeto PowerPoint embutido)", priority: P0}
+  - {id: GAP-003, item: "cronogramas por rodovia do produto 2.2", priority: P1}
+  - {id: GAP-004, item: "quadros de condicionantes do produto 2.4", priority: P1}
+  - {id: GAP-005, item: "resumo executivo", priority: P1}
+  - {id: GAP-006, item: "bloco de desapropriação: gatilho desconhecido", priority: P2}

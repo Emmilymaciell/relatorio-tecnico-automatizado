@@ -1,0 +1,425 @@
+# REGRA DE RENDER dos visuais reconstruidos (DEC-009) e aparencia do Controle de Produtos
+# Agente L (read-only) - 2026-10-01. Referencia: Relatorio G2 n 14 (Agosto/2026); conferido com n 13 (Julho/2026);
+# n 11 e n 12 so como historico. Medicoes em px sobre o PNG original extraido do DOCX (word/media) e em pt/cm
+# sobre o PDF (PyMuPDF). Coordenadas relativas = fracao da largura (x) e altura (y) do canvas, origem topo-esquerda.
+# Fonte: em_px = altura do em no canvas canonico (cap_px / 0.70); pbi_pt = estimativa em pt do Power BI
+# (canvas logico de 1280 px; captura = 1,21x). Cores = moda de pixels solidos (sem antialias).
+meta:
+  status: CANDIDATE
+  sources:
+    docx_14: "tmp/downloads/relatorios_11_14/prog - relatório grupo 2 - relatório mensal n°14 - 08 2026.docx"
+    pdf_14: "tmp/downloads/relatorios_11_14/prog - relatório grupo 2 - relatório mensal n°14 - 08 2026.pdf"
+    docx_13: "tmp/downloads/relatorios_11_14/prog - relatório grupo 2 - relatório mensal n°13 - 07 2026.docx"
+    pdf_13: "tmp/downloads/relatorios_11_14/prog - relatório grupo 2 - relatório mensal n°13 - 07 2026.pdf"
+    extracted_media: "tmp/agent_L/r{11..14}_imageNN.(png|emf)"
+  reference_renders:
+    - tmp/agent_L/ref_p22_road_RD-103_r14_pdf.png
+    - tmp/agent_L/ref_p22_road_RD-103_r13_pdf.png
+    - tmp/agent_L/ref_p24_indices_r14_pdf.png
+    - tmp/agent_L/ref_p24_indices_r13_pdf.png
+    - tmp/agent_L/ref_p24_condic_RD-101_r14_pdf.png
+    - tmp/agent_L/ref_p24_condic_RD-101_r13_pdf.png
+    - tmp/agent_L/ref_layout_r14_image13.png
+    - tmp/agent_L/ref_layout_r14_image19.png
+    - tmp/agent_L/ref_layout_r14_image20.png
+    - tmp/agent_L/ref_controle_r14_p24_full.png
+    - tmp/agent_L/ref_controle_r14_p33_full.png
+    - tmp/agent_L/ref_controle_r13_p31_3line_rows.png
+    - tmp/agent_L/ref_controle_r14_p24_head_400dpi.png
+
+common_placement:
+  docx: "inline, paragrafo proprio, sem wrap, sem crop, distT/B/L/R = 0"
+  width_cm: 17.50
+  x_on_page_cm: [2.00, 19.50]
+  height: "derivada da proporcao do canvas; nunca esticar"
+  format: PNG RGB
+  recommended_output_px_width: 2067
+  recommended_output_note: "300 dpi a 17,5 cm; historico 1532-1568 px (~226 dpi efetivos); tag dpi 120 no n14 e 96 no n13"
+  scale_rule: "desenhar no canvas canonico (px) e multiplicar por k = out_width / canvas_w"
+  fonts_available_here: {segoe_ui: "segoeui.ttf, segoeuib.ttf, seguisb.ttf", arial: "arial.ttf, arialbd.ttf"}
+  confidence: HIGH
+  evidence: "13/13 paineis PNG de n13 e n14 com 17,50 cm de largura no extent EMU e no PDF"
+
+# ---------------------------------------------------------------------------------------------------------------
+P2.2_ROAD_DASHBOARDS:
+  count_per_report: 4
+  order_in_doc: [RD-103, RD-102A, RD-101, RD-104]
+  docx_media: {n14: [image13, image14, image15, image16], n13: [image13, image14, image15, image16]}
+  measured:
+    n14:
+      - {road: RD-103, px: [1557, 875], cm: [17.50, 9.84]}
+      - {road: RD-102A, px: [1561, 872], cm: [17.50, 9.78]}
+      - {road: RD-101, px: [1562, 876], cm: [17.50, 9.82]}
+      - {road: RD-104, px: [1562, 873], cm: [17.50, 9.78]}
+    n13:
+      - {road: RD-103, px: [1561, 872], cm: [17.50, 9.78]}
+      - {road: RD-102A, px: [1564, 877], cm: [17.50, 9.81]}
+      - {road: RD-101, px: [1565, 876], cm: [17.50, 9.80]}
+      - {road: RD-104, px: [1566, 878], cm: [17.50, 9.81]}
+  canvas: {w: 1560, h: 876, aspect: 1.781, doc_cm: [17.50, 9.83], note: "pagina 16:9 do Power BI"}
+  background: "#FFFFFF"
+  frame: {color: "#0E1A77", thickness_px: 7, note: "historico 3 a 11 px por lado = recorte manual; usar uniforme"}
+  regions_rel:
+    logo: [0.029, 0.029, 0.151, 0.143]
+    logo_note: "logotipo Programa colorido #1C5560 com subtitulo CONSÓRCIO ESTRUTURADOR DO PROGRAMA"
+    updated_label: [0.016, 0.159, 0.118, 0.178]
+    updated_date: [0.025, 0.214, 0.191, 0.261]
+    slicer_title: [0.191, 0.039, 0.257, 0.059]
+    slicer_box: [0.188, 0.073, 0.491, 0.110]
+    grupo_label: [0.504, 0.026, 0.543, 0.042]
+    grupo_tiles: [0.503, 0.057, 0.981, 0.210]
+    grupo_tile_geometry: {cols: 2, tile_w_over_W: 0.235, tile_h_over_H: 0.070, gap_x_over_W: 0.008, gap_y_over_H: 0.014}
+    donut: {center: [0.115, 0.498], r_outer_over_H: 0.097, inner_ratio: 0.61}
+    legend: [0.211, 0.438, 0.273, 0.560]
+    table_header: [0.289, 0.251, 0.988, 0.286]
+    table_body: [0.289, 0.287, 0.988, 0.960]
+    table_body_note: "historico usa ate 0.903 com 22 linhas; 0.960 = limite antes do canto"
+    corner_triangle: {line_from: [0.0, 0.80], line_to: [0.22, 1.0], color: "#0E1A77", width_px: 5, fill_below_line: "#FFFFFF"}
+    corner_icon: [0.010, 0.840, 0.051, 0.920]
+    corner_icon_note: "icone de mapa com pino, traco preto"
+    road_label: [0.032, 0.939, 0.101, 0.963]
+  palette:
+    text_primary: "#252423"
+    text_secondary: "#605E5C"
+    zebra_first_row: "#FFFFFF"
+    zebra_second_row: "#EEEDED"
+    row_separator: "#E5E5E5"
+    header_rule: "#118DFF"
+    header_rule_px: 2
+    tile_border: "#B3B0AD"
+    slicer_border: "#EAEAEA"
+    date_box_border: "#F3F2F1"
+    date_box_border_note: "quase invisivel; pode omitir"
+    navy: "#0E1A77"
+    logo_teal: "#1C5560"
+    donut: {Analisada: "#118DFF", Atrasado: "#12239E", Em_analise: "#E66C37"}
+    donut_note: "cores 1-3 do tema padrao do Power BI"
+  typography:
+    family_ui: "Segoe UI (rotulos, slicers, tiles, datas, legenda, rodovia)"
+    family_table: "Arial em RD-103, RD-101, RD-104; Segoe UI so em RD-102A (igual em n13 e n14)"
+    items:
+      updated_label: {em_px: 24, weight: regular, color: "#252423", pbi_pt: 15, text: "Atualizado em:"}
+      updated_date: {em_px: 38, weight: regular, color: "#252423", pbi_pt: 24, format: "dd/mm/aaaa"}
+      slicer_title: {em_px: 21, weight: bold, color: "#252423", pbi_pt: 13, text: "Disciplina"}
+      slicer_value: {em_px: 16, weight: regular, color: "#605E5C", text: "Todos"}
+      grupo_label: {em_px: 21, weight: regular, color: "#252423", text: "GRUPO"}
+      tile_text: {em_px: 20, weight: regular, color: "#252423", align: "esquerda, padding 0.010W, centro vertical"}
+      table_header: {em_px: 17, weight: bold, color: "#252423"}
+      table_body: {em_px: 17, weight: regular, color: "#252423", pbi_pt: 10}
+      legend_title: {em_px: 17, weight: bold, color: "#605E5C", text: "Entrega"}
+      legend_item: {em_px: 17, weight: regular, color: "#605E5C", marker: "circulo r ~6 px", pitch_px: 31}
+      donut_label: {em_px: 16, weight: regular, color: "#605E5C", leader_line: "#7C7C7B 1 px"}
+      road_label: {em_px: 31, weight: bold, color: "#0E1A77"}
+  charts:
+    donut:
+      categories_order: [Analisada, Atrasado, "Em análise"]
+      categories_order_note: "= ordem alfabetica = ordem da legenda"
+      start_angle_deg_clockwise_from_12h: 0
+      evidence: "RD-103 n14 fronteiras 0/279/328 graus (17,3,2); RD-102A n14 0/270/325 (15,3,2)"
+      direction: clockwise
+      label: "fora da fatia, com linha guia"
+      label_format_observed: ["2,00 (9,09%)", "17,00 (77,27%)", "2 (10%)", "3 (15%)", "3,00 (15%)"]
+      label_format_recommended: "{n inteiro} ({pct com ate 2 decimais, virgula}%) ex. 17 (77,27%) e 2 (10%)"
+      zero_category: "omitir fatia e rotulo; manter item na legenda (nao observado; MEDIUM)"
+  table:
+    columns:
+      - {name: "Disciplina", w: 0.370, align: left, wrap: true}
+      - {name: "Previsão", w: 0.096, align: left, format: "dd/mm/aa"}
+      - {name: "Entrega", w: 0.081, align: left, format: "dd/mm/aa"}
+      - {name: "REV", w: 0.053, align: right, format: inteiro}
+      - {name: "1º Nível", w: 0.084, align: left}
+      - {name: "2º Nível", w: 0.118, align: left, wrap: true}
+      - {name: "Entrega da Revisão", w: 0.198, align: left}
+    columns_note: "w = fracao da largura da tabela, medida em RD-103 n14; o Power BI auto-ajusta por pagina"
+    header_text_top_rel: 0.251
+    row_pitch_px: 22
+    row_pitch_2_lines_px: 40
+    first_row_fill: "#FFFFFF"
+    vertical_grid: none
+    empty_cell: "vazio (nao usa --)"
+    sort: "ordem de disciplina (DEC-009 item 4)"
+  fixed_texts: ["Disciplina", "Todos", "GRUPO", "Atualizado em:", "Entrega", "Analisada", "Atrasado", "Em análise",
+                "Previsão", "REV", "1º Nível", "2º Nível", "Entrega da Revisão"]
+  data_driven_texts:
+    grupo_tiles: "grupos presentes na rodovia: 4 em RD-103 e RD-101; 3 em RD-102A e RD-104 (sem OAE)"
+    road_label: "RD-103, RD-102A, RD-101, RD-104 (A maiusculo)"
+  ui_noise_do_not_reproduce:
+    - "chevron do dropdown do slicer Disciplina"
+    - "seta de ordenacao (triangulo) sob o cabecalho Disciplina"
+    - "barra de rolagem horizontal cinza (RD-101 n14, y ~0.97H)"
+    - "rotulos truncados do donut: (18...) e (22,7...)"
+    - "espessura desigual da moldura"
+  historical_variation_not_rule:
+    - "x inicial da tabela varia 0.264 a 0.330 W conforme a pagina -> fixar 0.289"
+    - "tabela em Segoe UI e linha de 24.5 px so em RD-102A -> unificar (Arial, 3 de 4 paginas)"
+    - "coluna Entrega da Revisao mistura status e datas em M/D/AAAA (9/8/2026) -> anomalia"
+  confidence: {layout: HIGH, palette: CONFIRMED, typography: MEDIUM, donut_geometry: HIGH, column_widths: MEDIUM}
+
+# ---------------------------------------------------------------------------------------------------------------
+P2.4_ENV_INDICES_PANEL:
+  title_text: "Índices de Acompanhamento Ambiental - "
+  title_suffix: "logotipo Programa branco"
+  count_per_report: 1
+  docx_media: {n14: image19, n13: image19}
+  measured:
+    n14: {px: [1560, 877], cm: [17.50, 9.84]}
+    n13: {px: [1568, 880], cm: [17.50, 9.82]}
+    n12: {px: [1406, 791]}
+    n11: {px: [1566, 877]}
+  canvas: {w: 1560, h: 877, aspect: 1.779, doc_cm: [17.50, 9.84]}
+  background:
+    kind: "foto de obra (palmeiras e pa carregadeira amarela a direita) sob veu teal escuro"
+    median_color: "#275559"
+    same_image_as: "P2.4_CONDITIONS_PANELS (diferenca media 3,6/255 entre n13 e n14 na mesma regiao)"
+    rule: "STATIC_ASSET de fundo (imagem original do .pbix) ou fallback cor solida #275559"
+  regions_rel:
+    road_buttons: [0.014, 0.011, 0.247, 0.064]
+    road_buttons_note: "4 botoes RD-101, RD-102a, RD-103, RD-104; largura 0.056W; gap ~3 px; nenhum selecionado"
+    title: [0.278, 0.021, 0.761, 0.068]
+    title_rule: {x: [0.276, 0.760], y: [0.076, 0.079], color: "#6AC2D3"}
+    updated_box: [0.813, 0.014, 0.913, 0.082]
+    kpi_cards: [[0.019, 0.098, 0.328, 0.238], [0.348, 0.098, 0.657, 0.238], [0.673, 0.098, 0.981, 0.238]]
+    roads_title: [0.067, 0.293, 0.270, 0.318]
+    roads_plot: {x0: 0.055, baseline_y: 0.633, max_bar_h_over_H: 0.304, bar_w_over_W: 0.042, pitch_over_W: 0.061, xlabel_y: [0.645, 0.659]}
+    pie: {center: [0.502, 0.444], r_over_H: 0.130}
+    pie_legend: [0.433, 0.616, 0.568, 0.639]
+    phases_title: [0.763, 0.291, 0.951, 0.318]
+    phases_plot: {right_x: 0.992, first_bar_top_y: 0.343, bar_h_over_H: 0.032, pitch_over_H: 0.0372, clip_left_x: 0.648}
+    table_container: [0.008, 0.684, 0.992, 1.000]
+    table_header: [0.018, 0.698, 0.980, 0.739]
+  palette:
+    text: "#FFFFFF"
+    container_fill: "#296975"
+    card_border: "#66BCCD"
+    card_border_px: 1
+    button_fill: "#1C5560"
+    button_border: "#FFFFFF"
+    updated_box_fill: "#1C5560"
+    updated_box_border: "#FFFFFF"
+    table_header_fill: "#19444D"
+    table_row_fill: "#1C5560"
+    table_hgrid: "#E5E5E5"
+    table_vgrid: "#19444D"
+    road_bars: {RD-101: "#559DE3", RD-102a: "#3AD1EF", RD-103: "#62D6ED", RD-104: "#559DE3"}
+    road_bars_note: "cor segue a rodovia, nao a posicao (n11 tem outra ordem e as cores acompanham)"
+    road_bar_RD-103_history: ["#66BBE8 (n11, n12)", "#76D9EC (n13)", "#62D6ED (n14)"]
+    pie: {Pendente: "#31889B", Vigente: "#2DCA5C"}
+    phases:
+      "Outorga de uso de recurso hídrico": "#118DFF"
+      "Licença Ambiental Única": "#3FC866"
+      "Licença Ambiental - Canteiro de obra": "#EB895F"
+      "Licença Ambiental - Tanque Aéreo": "#F0E199"
+      "Licença Ambiental - Oficinas Mecânicas": "#B3B3B3"
+      "Licença de Instalação e Operação": "#A666B0"
+      _default: "#118DFF"
+    phases_note: "cor por categoria: n11 roxo na posicao 6 (Instalacao e Operacao), n12 azul na posicao 6 (Usina). HIGH"
+  typography:
+    family: "Segoe UI, branco"
+    title: {em_px: 35, weight: bold}
+    road_button: {em_px: 16, weight: bold}
+    updated_label: {em_px: 16, weight: regular, text: "Atualizado em:"}
+    updated_date: {em_px: 22, weight: semibold, format: "dd/mm/aaaa"}
+    kpi_label: {em_px: 22, weight: regular}
+    kpi_value: {em_px: 54, weight: regular}
+    chart_title: {em_px: 25, weight: bold}
+    bar_value: {em_px: 20, weight: bold}
+    axis_label: {em_px: 19, weight: regular}
+    pie_center: {em_px: 25, weight: bold, text: "Status"}
+    pie_label: {em_px: 20, weight: bold, format: "0,0%"}
+    pie_legend: {em_px: 20, weight: bold, marker: "circulo vazado para Pendente, cheio para Vigente"}
+    phase_label: {em_px: 23, weight: regular, count_weight: bold, pattern: "{n} {fase}"}
+    table_header: {em_px: 20, weight: bold}
+    table_body: {em_px: 19, weight: regular}
+  charts:
+    kpis: ["Total de Licenças", "Licenças Emitidas", "Licenças Pendentes"]
+    kpis_layout: "rotulo em cima, inteiro grande embaixo, ambos centralizados"
+    roads_columns:
+      order: "valor decrescente, empate alfabetico"
+      order_evidence: "n11 RD-101, RD-102a, RD-103, RD-104 (8,8,7,6); n12-n14 RD-103, RD-101, RD-102a, RD-104"
+      scale: "linear a partir de 0; maior valor = max_bar_h (0.304H). n14: 9 -> 267 px, 8 -> 238 px"
+      value_label: "acima da barra; quando a barra toca o topo do plot, dentro do topo (n14: 9)"
+      x_labels: "nome da rodovia como no dado (RD-102a minusculo)"
+      axes: none
+    pie:
+      slice_order: [Pendente, Vigente]
+      first_slice_start_deg_clockwise_from_12h: 158.5
+      evidence: "Pendente 158.5-245.5 graus em n14 (24,2%) e 158.5-248.5 em n13 (25,0%)"
+      labels: "fora, linha guia curta; Vigente acima a direita, Pendente abaixo a esquerda"
+    phases_bars:
+      orientation: horizontal
+      anchored_right: true
+      order: "valor decrescente, empate alfabetico"
+      historical_scale: "fixa 0.0212W por unidade (33 px em 1560 px; igual em n11, n13, n14); maior barra cortada em clip_left_x, rotulo dentro dela"
+      recommended_scale: "proporcional, maior valor = 0.344W; rotulo a esquerda da barra; o da maior dentro, alinhado a esquerda"
+    table:
+      columns:
+        - {name: "Rodovia", x: [0.018, 0.075], align: left}
+        - {name: "Empresa", x: [0.076, 0.235], align: center, wrap: true}
+        - {name: "Nº Processo", x: [0.236, 0.317], align: center, format: texto}
+        - {name: "Nº Licença", x: [0.318, 0.389], align: center, format: texto}
+        - {name: "Fase da licença", x: [0.390, 0.629], align: left, wrap: true}
+        - {name: "Data de validade", x: [0.630, 0.772], align: center, format: "dd/mm/aaaa"}
+        - {name: "Status", x: [0.774, 0.905], align: center}
+        - {name: "Link", x: [0.906, 0.980], align: center, content: "icone de corrente"}
+      header_align: "Rodovia a esquerda; demais centralizados"
+      cell_overflow: "texto mais largo que a celula quebra dentro dela (palavra; caractere se preciso) e a linha cresce; nunca invade a vizinha (QA-D n14, Gate D: Empresa sobre Rodovia e N Processo)"
+      row_pitch_over_H: 0.0296
+      row_pitch_note: "26 px; linha com quebra 50 px"
+      company_display:
+        note: "nome de exibicao da Empresa no modelo Power BI (WAVE1 B: MEDIUM), lido nas capturas n13/n14; sem entrada = nome da planilha"
+        confidence: MEDIUM
+        names:
+          "CONSTRUTORA DELTA LTDA": "Construtora Delta Ltda"
+          "CONSTRUTORA OMEGA S/A - CLX": "Construtora Omega S/A"
+          "CONSTRUTORA SIGMA - CSG": "Construtora Sigma"
+          "TETRA CONSTRUTORA ZETA LTDA": "Construtora Tetra"
+      observed_order: "Rodovia asc, depois Nº Processo como texto asc (janelas visiveis n13, n14) - MEDIUM"
+      historical_window: "so 8-9 linhas visiveis (rolagem); n13 mostra o topo, n14 o meio com linha cortada"
+  ui_noise_do_not_reproduce:
+    - "icone limpar filtros (funil com X vermelho) no canto superior direito"
+    - "barra de rolagem vertical da tabela e linhas cortadas na janela"
+    - "seta de ordenacao sob Data de validade / Status"
+    - "estado de rolagem da tabela"
+  confidence: {layout: HIGH, palette: CONFIRMED, pie_rotation: HIGH, phase_colors: HIGH, typography: MEDIUM, table_order: MEDIUM}
+
+# ---------------------------------------------------------------------------------------------------------------
+P2.4_CONDITIONS_PANELS:
+  title_text: "Status das Condicionantes - "
+  title_suffix: "logotipo Programa branco"
+  count_per_report: 4
+  order_in_doc: [RD-101, RD-102A, RD-103, RD-104]
+  docx_media: {n14: [image20, image21, image22, image23], n13: [image20, image21, image22, image23]}
+  measured:
+    n14: [{px: [1551, 622], cm: [17.50, 7.02]}, {px: [1550, 622], cm: [17.50, 7.02]}, {px: [1537, 623], cm: [17.50, 7.09]}, {px: [1532, 622], cm: [17.50, 7.11]}]
+    n13: [{px: [1545, 622], cm: [17.50, 7.05]}, {px: [1551, 621], cm: [17.50, 7.01]}, {px: [1547, 626], cm: [17.50, 7.08]}, {px: [1547, 616], cm: [17.50, 6.97]}]
+  canvas: {w: 1550, h: 622, aspect: 2.492, doc_cm: [17.50, 7.02]}
+  background: "igual ao P2.4_ENV_INDICES_PANEL (mesma foto, mesmo veu)"
+  regions_rel:
+    road_buttons: [0.010, 0.024, 0.237, 0.095]
+    road_buttons_note: "o botao da rodovia do painel fica selecionado"
+    title: [0.286, 0.040, 0.693, 0.096]
+    title_rule: {x: [0.268, 0.712], y: [0.106, 0.109], color: "#6AC2D3"}
+    updated_box: [0.814, 0.019, 0.915, 0.116]
+    cards: [[0.080, 0.182, 0.228, 0.471], [0.320, 0.182, 0.468, 0.471], [0.544, 0.182, 0.691, 0.471], [0.774, 0.182, 0.943, 0.471]]
+    card_icon: "branco, ~0.18H de altura, centrado na metade superior do card"
+    card_dot: "circulo r ~0.018H, borda branca 1 px; centro a 0.013W da borda direita e 0.035H do topo do card"
+    card_text_baseline_y: 0.452
+    subtitle_road: [0.207, 0.543, 0.401, 0.577]
+    subtitle_pct: [0.680, 0.535, 0.900, 0.566]
+    road_bar: {y: [0.736, 0.809], x0: 0.061, max_len_over_W: 0.489, label_x0: 0.014}
+    pct_columns: {slot_centers_x: [0.694, 0.798, 0.901], col_w_over_W: 0.078, baseline_y: 0.879, h100_over_H: 0.085, xlabel_y: 0.913}
+  palette:
+    text: "#FFFFFF"
+    card_fill: "#2A6975"
+    card_corner_radius_px: 22
+    card_edge: "brilho/sombra suave na borda inferior; opcional"
+    dots: {Finalizadas: "#2E7D32", No_prazo: "#373E76", Pendentes: "#C62828", Proximo_a_vencer: "#F9A825"}
+    button_fill: "#1C5560"
+    button_fill_selected: "#333333"
+    button_border: "#FFFFFF"
+    road_bar: "#559DE3"
+    pct_columns: {Finalizadas: "#50C056", No_prazo: "#515DB5", Proximas_ao_Vencimento: "#E8D166"}
+  typography:
+    family: "Segoe UI, branco"
+    title: {em_px: 39, weight: bold}
+    road_button: {em_px: 16, weight: bold}
+    updated: {label_em_px: 16, date_em_px: 22, text: "Atualizado em:", format: "dd/mm/aaaa"}
+    card_label: {em_px: 26, weight: regular}
+    card_value: {em_px: 33, weight: regular, zero: "--", zero_note: "dois tracos espacados"}
+    subtitle: {em_px: 24, weight: bold}
+    road_label: {em_px: 19, weight: regular}
+    road_value: {em_px: 20, weight: bold}
+    pct_label: {em_px: 20, weight: bold, format: "0,00 por cento com 2 decimais e virgula"}
+    pct_xlabel: {em_px: 20, weight: regular, wrap: "Próximas ao / Vencimento"}
+  charts:
+    cards:
+      - {label: "Finalizadas", icon: "ciclo com check"}
+      - {label: "No prazo", icon: "calendario com check"}
+      - {label: "Pendentes", icon: "triangulo de alerta"}
+      - {label: "Próximo à vencer", icon: "relogio com exclamacao", wider: true}
+    subtitles: ["Condicionantes por Rodovia", "% de Condicionantes por Status"]
+    road_bar:
+      scale: "comprimento = n / max(n das 4 rodovias do mes) * 0.489W"
+      evidence: "a maior rodovia sempre mede 759 px em n11, n13 e n14 (RD-101 e RD-104 = 46 no n14); RD-103 44 -> 726 px; RD-102a 43 -> 700 px"
+      value_label: "a direita da barra, negrito"
+      category_label: "a esquerda, rodovia como no dado (RD-102a)"
+    pct_columns:
+      categories_fixed_order: ["Finalizadas", "No prazo", "Pendentes", "Próximas ao Vencimento"]
+      zero: "categoria com 0 e omitida; as presentes ocupam os slots da esquerda para a direita"
+      zero_evidence: "n13 RD-101 so Finalizadas e No prazo, nos slots 1 e 2"
+      scale: "fixa de 0 a 100 por cento: altura = pct * h100 (0.085H); 73,91 -> 39 px; 65,91 -> 33 px; 2,17 -> 1 px"
+      pct_label: "acima da coluna, centralizado"
+  ui_noise_do_not_reproduce: ["icone limpar filtros no canto superior direito"]
+  confidence: {layout: HIGH, palette: CONFIRMED, scales: HIGH, typography: MEDIUM, pendentes_slot: LOW}
+
+# ---------------------------------------------------------------------------------------------------------------
+CONTROLE_DE_PRODUTOS_EMF:
+  scope: "aparencia historica; a geracao do metarquivo e do agente A"
+  representation: "EMF vetorial (faixa do Excel), um EMF por pagina; inline em paragrafo proprio (P2.x) ou varios EMFs num paragrafo (ANEXOS)"
+  width: {cm: 17.50, pt: 496.1, x_on_page_cm: [2.00, 19.50]}
+  height_rule_pt: "57.55 + soma das alturas das linhas"
+  height_evidence: "extent EMU n14: 25 linhas -> 18.36 cm; 23 -> 17.04; 32 -> 22.92 (calculado 18.36 / 17.05 / 22.92)"
+  blocks_pt:
+    title_band: {h: 39.84, fill: "#1C5560", text: "Programa | Controle de Produtos", font: "Arial Nova Cond Bold 9.25 pt", color: "#FFFFFF", text_x_inset: 1.6, valign: center}
+    title_logo: "Programa branco vetorial a direita, 55.3 x 25.4 pt, margem direita ~12.7 pt, centrado na faixa"
+    gap: {h: 8.45, fill: "#FFFFFF"}
+    header: {h: 9.26, fill: "#1F4993", font: "Arial Nova Cond Bold 6.84 pt", color: "#FFFFFF"}
+    rows: {h_min: 18.51, h_3_lines: 25.35, fill: "#FFFFFF", valign: center, zebra: none}
+  rows_height_rule: "ate 2 linhas de texto = 18.51 pt; 3 linhas = 25.35 pt (n13). n14 fixou 18.51 e cortou a 3a linha (anomalia)"
+  repeat_title_and_header_on_every_chunk: true
+  repeat_evidence: "todas as 11 paginas do n14 e as 13 do n13"
+  columns:
+    - {name: "Documento", w_pt: 56.7, w_rel: 0.114, align: left, font_pt: 7.24}
+    - {name: "Parecer", w_pt: 92.6, w_rel: 0.187, align: left, font_pt: 7.24}
+    - {name: "Descrição", w_pt: 170.2, w_rel: 0.343, align: left, font_pt: 7.24, wrap: true}
+    - {name: "Empreendimento", w_pt: 61.2, w_rel: 0.123, align: left, font_pt: 7.24}
+    - {name: "Data Entrega", w_pt: 53.9, w_rel: 0.109, align: left, font_pt: 6.84, format: "dd/mm/aaaa"}
+    - {name: "Status Entrega", w_pt: 61.4, w_rel: 0.124, align: left, font_pt: 6.84, header_align: center}
+  columns_evidence: "bordas das celulas pela posicao das setas de autofiltro, PDF n14 p24: x = 56.7, 113.4, 206.0, 376.2, 437.4, 491.3, 552.8 pt"
+  header_align: "esquerda, exceto Status Entrega (centralizado)"
+  text: {family: "Arial Nova Cond", color: "#000000", left_inset_pt: 1.6, line_pitch_pt: 9.25}
+  borders:
+    horizontal: "0.40 pt preta, pontilhado fino (estilo hair do Excel), sob o cabecalho e sob todas as linhas, inclusive a ultima"
+    vertical: none
+    outer: none
+  scale_variants_pt:
+    "1.000": {body: 7.24, small: 6.84, title: 9.25, row: 18.51}
+    "0.958 (n14 p39)": {body: 6.93, small: 6.55, title: 8.86, row: 17.73}
+    "0.953 (n14 p41)": {body: 6.90, small: 6.52, title: 8.81, row: 17.64}
+  pagination:
+    observed_rows_per_chunk:
+      n14: {P2.1: [3], P2.2: [25, 23], P2.4: [32, 34, 32], ANEXOS: [31, 31, 39, 33, 15]}
+      n13: {P2.1: [10], P2.2: [25, 25], P2.4: [27, 26, 31, 27], ANEXOS: [26, 28, 31, 30, 31, 19]}
+    totals: {n14: "149 corpo / 149 índice", n13: "171 corpo / 165 índice", rule: "corpo = body_rows; índice = index_rows (Status Entrega == 'Entregue'), DEC-012"}
+    page_body_pt: {top_observed: 62.0, bottom: 799.37, note: "margens 2,0 / 1,5 / 1,5 / 2,0 cm; topo efetivo 2,19 cm"}
+    max_rows_full_page_at_scale_1: 36
+    historical: "corte manual; nao enche a pagina; com 39 linhas o Word encolheu a figura para 26,20 cm de altura (16,68 cm de largura)"
+    recommended: "encher a pagina: linhas que cabem em (altura restante - 57.55 pt); primeiro bloco logo apos a frase de chamada; escala 1,0 e largura 17,50 cm sempre"
+  noise_do_not_reproduce:
+    - "setas de autofiltro (imagens 21x21 px) em cada cabecalho"
+    - "seta de coluna oculta a esquerda (x 48-56 pt) e faixa de 27 imagens 8x8 px acima do titulo"
+    - "coluna oculta com preenchimento #FFFF00 alem do clip (x maior que 552.5 pt)"
+    - "celula de data mesclada verticalmente (PA-681.1 / PA-682.1, n14 p24)"
+    - "texto de 3 linhas cortado (NT-734.1, n14 p24)"
+  history: {n11: "EMF com cabecalho #5B9BD5 e layout anterior (HISTORICAL_PATTERN)", n12: "JPG raster (HISTORICAL_DEFECT)"}
+  confidence: {geometry: CONFIRMED, colors: CONFIRMED, fonts: CONFIRMED, border_style: MEDIUM, pagination_rule: MEDIUM}
+
+anomalies_candidates:
+  - {id: road_dash_us_dates, where: "P2.2 coluna Entrega da Revisao, n13 e n14", what: "datas M/D/AAAA misturadas com status (9/8/2026)"}
+  - {id: road_dash_font_RD102A, where: "P2.2 RD-102A, n13 e n14", what: "tabela em Segoe UI, linha 24.5 px; outras 3 em Arial 22 px"}
+  - {id: road_dash_donut_format, where: "P2.2 n14", what: "rotulos 17,00 (77,27 pct) vs 15 (75 pct) entre paginas"}
+  - {id: cond_card_crase, where: "P2.4 condicionantes, n11 a n14", what: "texto fixo com crase indevida no card 4; o grafico usa Proximas ao Vencimento"}
+  - {id: road_name_case, where: "P2.4 paineis", what: "RD-102a minusculo vs RD-102A no texto e no P2.2"}
+  - {id: phase_bar_clip, where: "P2.4 indices n11 a n14", what: "maior barra de fase cortada pela escala fixa"}
+  - {id: ctrl_emf_shrunk, where: "Controle n14 image27 16.76 cm e image29 16.68 cm; n13 image28 16.57 cm", what: "largura menor que 17,50 por encolhimento"}
+  - {id: ctrl_3line_clipped, where: "Controle n14 p24 NT-734.1", what: "3a linha da descricao cortada; n13 usava linha de 25.35 pt"}
+
+gaps:
+  - "Fundo dos paineis ambientais (foto + veu): sem copia limpa; precisa do .pbix/tema ou aceite do fallback #275559"
+  - "Logotipo Programa colorido (#1C5560) do P2.2 e logotipo branco dos titulos: nao existem como midia isolada no DOCX; candidato = vetor do logo branco dentro dos EMF do Controle (ex. r14_image11.emf), recolorido"
+  - "Icones dos 4 cards e do mapa/pino: so raster ~110 px; extrair mascara alfa (fundo uniforme #2A6975) ou trocar por icone equivalente"
+  - "Slot da coluna Pendentes no grafico de percentuais quando maior que 0: nunca observado"
+  - "Tabela do painel Indices: a captura e uma janela de rolagem; mostrar todas as linhas (painel mais alto) ou so N primeiras e decisao da Emmily"
+  - "Slicer Disciplina/Todos e tiles GRUPO: manter como rotulos estaticos sem chevron (interpretacao provisoria)"
+  - "Arial Nova Cond / Arial Nova Light nao estao instaladas nesta maquina (so embutidas no PDF); o render do Controle exige a familia"
+  - "matplotlib nao esta na venv (numpy 2.5.3 sim)"

@@ -1,0 +1,51 @@
+# Configuracao canonica do projeto. Nao contem segredo.
+# IDs descobertos por API entram em state/sharepoint_ids.yaml, nao aqui.
+
+project:
+  name: PROG_Relatorio_G2_Automacao
+  report_family: G2
+  report_title: "Relatório Mensal do Grupo 2 - Gestão de Engenharia e Socioambiental"
+  contract: Programa
+  language: pt-BR
+
+phase:
+  current: 1            # ver docs/architecture/PHASES.md
+  model_status: NONE    # NONE -> CANDIDATE -> FROZEN -> CERTIFIED
+
+sharepoint:
+  hostname: contoso.sharepoint.com
+  site_path: /sites/exemplo
+  # Estrutura observada no link de referencia (Janeiro/2026). CONFIRMAR por API.
+  expected_products_root: "4. Produtos"
+  expected_group_folder: "G2"
+  # Link de referencia (janeiro/2026), guardado como evidencia de partida:
+  reference_link_note: "sites/PROGRAMA/PROGRAMA/4. Produtos/07. Janeiro 2026/G2"
+  access_mode: READ_ONLY   # imutavel neste projeto
+
+corpus:
+  # Hipotese fornecida pela usuaria; verificar independentemente (Fase 2/3).
+  reports_hypothesis:
+    first: {number: 1, month: 2025-07}
+    last: {number: 14, month: 2026-08}
+
+confidence_levels: [CONFIRMED, HIGH_CONFIDENCE, MEDIUM_CONFIDENCE, LOW_CONFIDENCE, UNKNOWN]
+
+anomaly_classes:
+  - HISTORICAL_DEFECT
+  - COPY_FORWARD_ERROR
+  - TYPO
+  - FORMAT_VARIATION
+  - TRUE_MODEL_CHANGE
+  - UNRESOLVED
+
+authority_order:
+  # Para definir o padrao vigente. Nao elimina validacao.
+  - explicit_user_instruction
+  - contract_rule
+  - confirmed_current_model
+  - "Relatório G2 nº 14 (Agosto/2026) — principal referência do padrão atual"
+  - "Relatório G2 nº 13 (Julho/2026)"
+  - "Relatório G2 nº 12 (Junho/2026)"
+  - "Relatório G2 nº 11 (Maio/2026)"
+  - "Relatórios nº 06 a nº 10 — evidência de evolução"
+  - "Relatórios nº 01 a nº 05 — evidência histórica"

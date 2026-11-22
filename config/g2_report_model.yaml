@@ -1,0 +1,863 @@
+# G2_REPORT_MODEL — modelo do Relatório G2 (substitui config/report_spec_draft.yaml, SUPERSEDED).
+# Validado por prog_g2_report.model.validate_model (Gate B). Não certificado.
+# Arquivos irmãos (toda referência a arquivo/chave usa o formato `arquivo#chave/subchave`):
+#   config/ooxml_base.yaml        estilos, numeração, tema, seções, cabeçalho/rodapé, TOC (OOXML)
+#   config/g2_content_blocks.yaml os blocos de texto na ordem do documento (fixos, templates, dados)
+#   config/data_rules/*.yaml      regras dos blocos data-driven (2.1 resumo, 2.2 por rodovia, 2.4)
+#   config/g2_render_rules.yaml   regras de render dos visuais reconstruídos (DEC-009)
+#   config/assets_manifest.yaml   assets estáticos por sha1 (arquivos em assets/discovered/raw/)
+#   config/golden_allowances.yaml desvios permitidos no golden test (congelados)
+# Evidência resumida: docs/discovery/WAVE1_FINDINGS.md; decisões em docs/decisions/.
+
+model:
+  name: G2_REPORT_MODEL
+  version: "0.14"
+  status: BUILDER_READY          # Gate B PASS 2026-10-02 (W4); NONE -> CANDIDATE -> BUILDER_READY -> FROZEN -> CERTIFIED
+  # Mudança de regra dentro de componente MEDIUM (P2.2_DISCIPLINE_STATUS) não rebaixa o status;
+  # mudança permanente de padrão = nova versão, registrada aqui.
+  changelog:
+    - version: "0.14"
+      date: "2026-10-02"
+      decision: DEC-015
+      components: [P2.2_EXTERNAL_STATUS]
+      change: >-
+        Análise Programa das matrizes (inputs.p22_external_status.schema.derived.prog): conjunto
+        novo approval_with_reservation pela mesma regra de ressalva do P2.2_HIGHWAY_BLOCK
+        ('Aprovado com ressalva'; interferências 'Aprovado com ressalva e encaminhado a
+        GFD'), para a matriz e o corpo do 2.2 não divergirem (QA4-H). O 'Aprovado' do nº 14
+        para aprovações com ressalva é a anomalia P2.2_EXTERNAL_PROG_RESSALVA_OMITIDA.
+        DEC-007: 'Referente às' / 'Ainda referente às' (P2.1_CRONO_LEAD, P2.4_GAMB; anomalia
+        CRASE_REFERENTE_AS).
+      previous: "0.13"
+    - version: "0.13"
+      date: "2026-10-02"
+      decision: DEC-015
+      components: [P2.2_DISCIPLINE_STATUS]
+      change: >-
+        ressalva por disciplina na linha de Aprovação do P2.2_HIGHWAY_BLOCK
+        (config/data_rules/p22_highway_block.yaml#templates/approval/reservation_qualifier:
+        none -> per_discipline; templates novos em #templates/approval/with_reservation). A
+        ressalva é fato de Projetos!S; a generalização dos Relatórios G2 de Julho e Agosto/2026
+        é a anomalia P2.2_APROVADOS_COM_RESSALVA_GENERALIZADO (expected_value = fato da
+        planilha, não mais a regra do modelo: QA3-E).
+      previous: "0.12"
+  reference: "Relatório G2 nº 14 — Agosto/2026"
+  evidence_window: ["2026-05", "2026-06", "2026-07", "2026-08"]
+  golden_tests:
+    - {report_number: 14, reference_month: "2026-08", role: reference}
+    - {report_number: 13, reference_month: "2026-07", role: temporal}
+  evidence_snapshots:
+    # Registro do Gate B (objeção 8): as specs do Gate A foram VALIDADAS contra snapshots que não
+    # são os de publicação; o golden test usa os snapshots DEC-012.
+    validated_against:
+      master_list: {"2026-07": "134.0", "2026-08": "335.0", note: "agentes A, J, K, O (Gate A)"}
+    golden_test:
+      master_list: {"2026-07": "162.0", "2026-08": "331.0"}
+      projects: {"2026-07": "328.0", "2026-08": "438.0"}
+      environmental: {"2026-07": "289.0", "2026-08": "310.0"}
+    rule: "DEC-012: última versão com lastModified <= instante de referência de cada fonte"
+    consequence: "regras que dependem do snapshot de julho (filtro do índice, BM em elaboração) só valem como provadas na v162"
+
+# Arquivos citados pelo modelo que ainda não existem (o validador os reporta como pendência, não
+# como violação). Vazio: config/ooxml_base.yaml e config/golden_allowances.yaml já foram entregues.
+pending_files: []
+
+known_limitations:
+  - id: RAW_ASSETS_GITIGNORED
+    detail: >-
+      assets/discovered/raw/ é gitignored (a faixa da Apresentação tem fotos com pessoas;
+      contains_people_photos: true). Os arquivos são regenerados por
+      scripts/13_extract_static_assets.py a partir do DOCX do Relatório G2 nº 14 baixado com
+      autorização; o sha1 de cada um está em config/assets_manifest.yaml e o builder o confere.
+  - id: SNAPSHOTS_ONLY_IN_SHAREPOINT_HISTORY
+    detail: >-
+      Os snapshots do golden test (Lista Mestra v162/v331, projetos v328/v438, ambiental
+      v289/v310) só existem no histórico de versões do SharePoint, que é finito (DEC-012).
+  - id: OFFICE_ENVIRONMENT
+    detail: >-
+      Controle de Produtos exige Windows + Excel + Word em sessão interativa e DPI do histórico
+      (DEC-010); a família Arial Nova precisa estar instalada para render e PDF.
+
+page:
+  size: A4
+  width_cm: 21.0
+  height_cm: 29.7
+  header_distance_cm: 1.0
+  footer_distance_cm: 0.0
+  section_break: nextPage
+  confidence: CONFIRMED
+  evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+  provenance: ["ooxml:nº14 sectPr", "docs/discovery/ANATOMY_2026-05_TO_2026-08.md §1 (idêntico nos 4 meses)"]
+  sections:
+    - index: 0
+      orientation: portrait
+      margins_cm: {top: 2.0, bottom: 1.5, left: 2.0, right: 1.5}
+      title_page: true           # capa sem cabeçalho/rodapé (DEC-011)
+      content: [cover, toc, presentation, chapter_2_until_landscape]
+    - index: 1
+      orientation: landscape
+      margins_cm: {top: 2.0, bottom: 1.5, left: 1.5, right: 2.0}
+      note: "retrato girado pelo Word (herança, não 'espelhamento'); revisão H"
+      content: [landscape_block]
+    - index: 2
+      orientation: portrait
+      margins_cm: {top: 2.0, bottom: 1.5, left: 2.0, right: 1.5}
+      content: [p21_rest, p22, p23, p24, p25, p26, closing, annexes]
+
+typography:
+  confidence: CONFIRMED
+  evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+  provenance: ["ooxml:nº14 styles.xml minorHAnsi/majorHAnsi", "WAVE1 §H, §I", "ANATOMY_2026-05_TO_2026-08.md (fontes dos 4 meses)"]
+  body: {font: "Arial Nova Light", size_pt: 11}
+  headings_and_header: {font: "Arial Nova Cond"}
+  cover_date: {font: "Arial Nova Cond Light"}
+  product_control_text: "derivado da escala do EMF (≈7,2 pt a 17,5 cm); não é parâmetro"
+  fonts_required: ["Arial Nova", "Arial Nova Light", "Arial Nova Cond", "Arial Nova Cond Light"]
+  embed_fonts: true
+
+# page_break_before: cada produto começa no topo de uma página. Representação histórica: parágrafo
+# vazio com w:br type=page antes do título (2.1–2.5) ou o w:br no início do próprio título (2.6);
+# o builder usa pageBreakBefore no título (mesma posição, sem parágrafo vazio). Evidência: DOCX
+# nº 11–14 (body: br antes de 2.1, 2.2, 2.3, 2.4 e 2.6 nos 4 meses; antes de 2.5 nos nº 11, 13
+# e 14 — no nº 12 o 2.5 também abre no topo da página 38, por quebra natural) e PDFs nº 11–14
+# (título de cada produto a 2,18 cm do topo; 2,61 cm no 2.6 pelo br dentro do título).
+products:
+  - {code: "2.1", title_source: content_blocks, always_present: true, page_break_before: {value: true, confidence: CONFIRMED, evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]}}
+  - {code: "2.2", title_source: content_blocks, always_present: true, page_break_before: {value: true, confidence: CONFIRMED, evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]}}
+  - {code: "2.3", title_source: content_blocks, always_present: true, page_break_before: {value: true, confidence: CONFIRMED, evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]}}
+  - {code: "2.4", title_source: content_blocks, always_present: true, page_break_before: {value: true, confidence: CONFIRMED, evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]}}
+  - {code: "2.5", title_source: content_blocks, always_present: true, page_break_before: {value: true, confidence: HIGH_CONFIDENCE, evidence_months: ["2026-05", "2026-07", "2026-08"], note: "nº 12 sem br explícito, mas o título também abre página"}}
+  - {code: "2.6", title_source: content_blocks, always_present: true, page_break_before: {value: true, confidence: CONFIRMED, evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]}}
+
+# POSICIONAMENTO (onde cada coisa fica), separado de conteúdo e de representação. Lido por
+# prog_g2_report.builder.assemble.
+positioning:
+  # Parágrafos vazios entre dois blocos consecutivos, quando ambos foram emitidos. Só entram
+  # vazios presentes nos 4 meses (DOCX nº 11–14, mesmos vizinhos de texto); os de um ou dois
+  # meses são espaçamento manual e não se aprendem (ex.: 14 vazios antes de RD-104 no 2.4).
+  spacers:
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    provenance: "DOCX nº 11–14: parágrafos vazios fora de qualquer `order` de g2_content_blocks.yaml"
+    between:
+      - {after: TOC, before: APRES_TITLE, count: 1}
+      - {after: APRES_TITLE, before: APRES_P1_SELECAO, count: 1}
+      - {after: APRES_P1_SELECAO, before: APRES_LOGO_GRUPOS, count: 1}
+      - {after: APRES_LOGO_GRUPOS, before: APRES_P2_CONSORCIO, count: 1}
+      - {after: APRES_P2_CONSORCIO, before: APRES_P3_IDENTIFICACAO, count: 1}
+      - {after: CH2_TITLE, before: CH2_INTRO, count: 1}
+      - {after: CH2_INTRO, before: CH2_ATIV_LEAD, count: 1}
+      - {after: CH2_ATIV_LIST, before: P2.1_TITLE, count: 1}
+      - {after: P2.5_NO_ACTIVITY, before: P2.6_TITLE, count: 1}
+      - {after: P2.6_NO_ACTIVITY, before: ENC_TITLE, count: 1}
+    note: "o vazio antes de cada rodovia do 2.2 já sai do P2.2_HIGHWAY_BLOCK (parte spacer)"
+  # Alinhamento do parágrafo de um asset estático (sem chave = alinhamento do estilo Normal).
+  static_assets:
+    p22_predecessor_disciplines_diagram:
+      align: center
+      confidence: CONFIRMED
+      evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+      provenance: "DOCX nº 11–14: parágrafo do EMF com jc=center (x = 3,13 cm no PDF do nº 14)"
+  # Largura dos assets do bloco paisagem: GAP-004 (aberto) manda reproduzir o histórico, em que
+  # duas imagens (27,02 e 26,45 cm) passam dos 26,20 cm úteis. `limit_to_usable_area` é a
+  # alternativa à espera da decisão da Emmily.
+  landscape_width:
+    value: manifest                  # manifest | limit_to_usable_area
+    gap: GAP-004
+    confidence: MEDIUM_CONFIDENCE
+  # Âncoras dos visuais reconstruídos (P2.4_LICENSE_DASHBOARDS) nos blocos de texto:
+  #   after     o visual vem logo depois do bloco
+  #   per_item  um visual por item do bloco que comece por uma rodovia; `ref` = '<prefixo>:<rodovia>';
+  #             rodovias do dado sem item vão depois do bloco
+  # Evidência: textos fixos que apontam para a imagem (P2.4_LIC_LEAD "Conforme pode ser observado
+  # na imagem a seguir", P2.4_LAU_LEAD "nas imagens a seguir") e posição dos desenhos nos nº 13 e
+  # nº 14 (lacunas 278 e 284–308 de `order`).
+  # Depois do PDF, fora do builder: o PDF publicado é assinado digitalmente pelo signatário
+  # (campo de assinatura "Signature1" na página do Encerramento, SigFlags 3 = assinado e
+  # append-only, nos nº 11–14). No nº 14 a aparência dessa assinatura traz um raster de
+  # 440×120 px entre a data e a tabela de assinatura; nos nº 11–13 a aparência não tem imagem.
+  # Não é elemento do DOCX nem entrada do builder: a imagem é da pessoa e não se extrai nem se
+  # versiona. O builder entrega o PDF sem assinatura; a assinatura é etapa humana posterior.
+  post_build_signature:
+    stage: manual_after_pdf
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    provenance: "PDFs nº 11–14: widget Signature (FT Sig), SigFlags 3; DOCX nº 11–14 sem imagem no Encerramento"
+  visual_anchors:
+    confidence: HIGH_CONFIDENCE
+    evidence_months: ["2026-07", "2026-08"]
+    anchors:
+      - {block: P2.4_LIC_LIST, mode: after, ref: P2.4_ENV_INDICES_PANEL}
+      - {block: P2.4_LAU_LIST, mode: per_item, ref: P2.4_CONDITIONS_PANEL}
+  # Parágrafos de TEXTO que ficam na página do que vem a seguir (w:keepNext); parágrafo só de
+  # imagem não recebe (a cadeia prenderia o bloco inteiro). Padronização (DEC-007), não fato
+  # histórico: no nº 14 "RD-101:"/"RD-104:" ficaram no pé da página, longe do painel (QA-D,
+  # docs/qa/GATES.md, Gate D). `before_product_control`: a frase de chamada (parágrafo
+  # imediatamente antes do Controle de Produtos) recebe keepNext quando o 1º recorte foi
+  # dimensionado para a página dela (CONTROL_OF_PRODUCTS.render_params.first_slice_fill).
+  # QA2-D (2ª rodada do QA visual, 2026-10-02): parágrafos introdutórios sozinhos no pé da
+  # página — "Referente às Condicionantes da LAU:" (P2.4_LAU_HEAD) e "…Dessa forma, tem-se:"
+  # (P2.4_LAU_LEAD) no 2.4.2 (nº 14 p29), e os títulos de lista do 2.2 ("Disciplinas do Viário
+  # Secundário:" etc., nº 14 p19/20). `list_titles`: nos blocos listados, parágrafo de texto
+  # terminado em `ends_with` cujo próximo parágrafo não vazio é TEXTO (o 1º item) recebe
+  # keepNext; título seguido de imagem (painel) não recebe. Padronização (DEC-007).
+  keep_with_next:
+    confidence: HIGH_CONFIDENCE
+    evidence_months: ["2026-08"]
+    provenance: "QA-D do nº 14 (docs/qa/GATES.md, Gate D): MAJOR 1 e MINOR; DEC-010 §3; QA2-D (b)"
+    blocks: [P2.4_LAU_HEAD, P2.4_LAU_LEAD, P2.4_LAU_LIST]
+    before_product_control: true
+    list_titles:
+      blocks: [P2.2_HIGHWAY_BLOCK, P2.2_DESAPROPRIACAO, P2.2_INTERFERENCIAS]
+      ends_with: ":"
+
+# Domínio de rodovias do contrato — declarado UMA vez. Cada bloco que enumera rodovias usa um slot
+# e uma das ordens abaixo; o validador confere que toda ordem é permutação exata de `highways`.
+contract:
+  highways:
+    - {code: RD-101, environmental_company: CSG, gamb_process: "000000000000001"}
+    - {code: RD-102A, environmental_company: CLX, gamb_process: "000000000000002", aliases: ["RD-102a", "RD-102 A", "RD 102a"]}
+    - {code: RD-103, environmental_company: Delta, gamb_process: "000000000000003"}
+    - {code: RD-104, environmental_company: Tetra, gamb_process: "000000000000004"}
+  normalization: "strip + NBSP→espaço + aliases → code (WAVE1 §N, §B); 'RD-103-0' do GED não é RD-103"
+  # Constantes de contrato SEM fonte em planilha. Cada atributo de `highways` que o builder emite
+  # como texto e que não sai de nenhuma fonte de `sources` é declarado aqui, com proveniência.
+  # O valor fica em `highways[].<field>` (um lugar só; P2.4_GAMB o lê por `items.template`).
+  environmental_processes:
+    field: gamb_process
+    used_by: [P2.4_GAMB]
+    confidence: HIGH_CONFIDENCE
+    provenance: "P2.4_GAMB: os 4 números idênticos nos nº 11–14 (content_blocks P2.4_GAMB observed.items_no11_no14)"
+    note: "fonte externa à planilha (processos abertos pela GAMB/DPJ); revisar quando mudar — mudança é nova versão do modelo"
+  highway_orders:
+    ORDER_ALPHA:
+      ref: config/data_rules/p24_blocks.yaml#common/highway_orders/ORDER_ALPHA
+      used_by: [P2.1_SUMMARY_S1_P21, P2.1_SUMMARY_S3_P22, P2.1_SUMMARY_S5_P24, P2.4_NC, P2.4_BM_LIST, P2.4_LAU_LIST]
+    ORDER_RO:
+      ref: config/data_rules/p24_blocks.yaml#common/highway_orders/ORDER_RO
+      used_by: [P2.4_RO_INTRO, P2.4_RO_LIST, P2.4_RA]
+    ORDER_GAMB:
+      ref: config/data_rules/p24_blocks.yaml#common/highway_orders/ORDER_GAMB
+      used_by: [P2.4_GAMB, P2.4_RCA_LIST, P2.4_LIC_LIST]
+    ORDER_P22:
+      ref: config/data_rules/p22_highway_block.yaml#road_order/value
+      used_by: [P2.2_HIGHWAY_BLOCK, P2.2_DESAPROPRIACAO, P2.2_INTERFERENCIAS]
+    ORDER_P22_DASHBOARDS:
+      ref: config/g2_render_rules.yaml#P2.2_ROAD_DASHBOARDS/order_in_doc
+      used_by: [P2.2_ROAD_DASHBOARDS]
+    ORDER_P24_CONDITIONS_PANELS:
+      ref: config/g2_render_rules.yaml#P2.4_CONDITIONS_PANELS/order_in_doc
+      used_by: [P2.4_LICENSE_DASHBOARDS]
+    ORDER_MEETINGS:
+      ref: config/data_rules/p21_executive_summary.yaml#config/meetings
+      item_key: rodovia
+      used_by: [P2.1_MEETINGS_LIST]
+    ORDER_P21_MANAGED:
+      ref: config/data_rules/p21_executive_summary.yaml#config/rodovias_gerenciadas
+      used_by: [P2.1_SUMMARY_S1_P21]
+
+sources:
+  master_list:
+    name: "00_ Lista mestre.xlsx"
+    sheet: "Controle Geral"
+    role: manifesto do relatório (DEC-006)
+    selection:
+      body_rows: "N° Relatório == report_number (todas as linhas, inclusive 'Em elaboração')"
+      index_rows: "body_rows ∧ Status Entrega == 'Entregue' (DEC-012; coluna do filtro MEDIUM)"
+      order: "ordem física da linha; nunca reordenar (CONFIRMED jul/ago; maio era por código)"
+      product_filter: "código do produto (prefixo de 'Produto') == 2.X"
+      ignore_saved_filter: true
+    snapshot:
+      production: "estado no instante da geração; versão registrada no manifesto"
+      reconstruction: "última versão com lastModified <= CreationDate do PDF publicado (DEC-012)"
+      proven: {"2026-07": "162.0", "2026-08": "331.0"}
+  projects:
+    name: "03 - Acompanhamento de Projetos Executivo.xlsx"
+    sheets: [GED, Projetos, "Painel de Controle"]
+    role: "status de disciplinas e quadros por rodovia do 2.2 (cadeia GED → Projetos → Painel)"
+    ignore_saved_filter: true
+    snapshot:
+      production: "instante da geração"
+      reconstruction: "DEC-012 (CreationDate do PDF); GAP-008 resolvido: 100% das linhas e células dos quadros (WAVE1 §E)"
+      proven: {"2026-07": "328.0", "2026-08": "438.0"}
+      note: "o texto do nº 14 saiu da v436 e o quadro da v437+ (anomalia P2.2_PAVIMENTACAO_RD101_STATUS_DEFASADO)"
+  environmental:
+    name: "04_Acompanhamento - Licenca Ambiental.xlsx"
+    sheets: [Licenças, Condicionantes, Empresas]
+    role: "painéis e textos de licenças e condicionantes do 2.4"
+    ignore_saved_filter: true
+    status_recalculation: "recalcular Status com data de referência explícita; nunca usar o cache de TODAY()"
+    snapshot:
+      production: "instante da geração; a data de referência do status = data impressa 'Atualizado em'"
+      reconstruction: "última versão com lastModified <= instante 'Atualizado em' do painel"
+      proven: {"2026-07": "289.0", "2026-08": "310.0"}
+  not_sources:
+    - {name: "02_Acompanhamento de NC automatizada.xlsm", reason: "não alimenta o relatório (WAVE1 §C)"}
+    - {name: "Power BI publicado", reason: "referência visual apenas (DEC-009)"}
+
+inputs:
+  # Obrigatórias (required: true, sem padrão): ausentes, o build não começa
+  # (prog_g2_report.builder.generate.report_dates; scripts 15 e 17).
+  issue_date: {type: date, required: true, used_by: [COVER], note: "data da capa (emissão); `issue_date` do YAML de entradas ou --issue-date (prevalece)"}
+  signature_date: {type: date, required: true, used_by: [SIGNATURE_DATE], note: "independente da capa; `signature_date` do YAML de entradas ou --signature-date (prevalece)"}
+  signatory_name: {type: str, required: true, used_by: [SIGNATURE_TABLE], note: "informado a cada relatório no YAML de entradas; nunca herdado de outro relatório"}
+  meetings_agenda: {type: list, required: false, used_by: [P2.1_MEETINGS_AGENDA], default_from: "config/data_rules/p21_executive_summary.yaml#render_maps/meetings (configuração estável; hora é externa)"}
+  p22_external_status:
+    type: mapping
+    required: false
+    used_by: [P2.2_EXTERNAL_STATUS, P2.2_EXPROPRIATION_LAYOUT]
+    note: "desapropriação e interferências por rodovia: GDP, Casa Civil, GFD, concessionária e início dos processos são entrada humana (GAP-009); a Análise Programa (`prog`) NÃO é entrada: sai da aba Projetos (schema.derived.prog, QA2-E)"
+    # Formato (renderizador prog_g2_report.render.p22_external):
+    #   p22_external_status:
+    #     RD-103:                                  # código de contract.highways (aliases aceitos)
+    #       dup: {gdp: "...", casa_civil: "..."}
+    #       expropriation_project: {gdp: "...", started: "..."}
+    #       interferences: {gfd: "...", utility: "...", started: "..."}
+    # `prog` vem da planilha de projetos (schema.derived.prog); se vier na entrada, é ignorado
+    # com aviso (a planilha prevalece) e registrado nos fatos do bloco.
+    schema:
+      confidence: MEDIUM_CONFIDENCE              # layout de um mês (nº 14; GAP-006)
+      key: "rodovia (config/g2_report_model.yaml#contract/highways, aliases normalizados)"
+      road_order: "ORDER_P22 (mesma ordem dos blocos P2.2_HIGHWAY_BLOCK; rodovia fora dela vai ao fim, com aviso)"
+      matrices:
+        # id da matriz na entrada -> `ref` (rótulos `keys`, highway_item/key_item = listas) no
+        # bloco de texto; `fields` = campo da entrada de cada rótulo de `keys`, na mesma ordem;
+        # `label_part` = fixed_parts[N] do bloco que precede a matriz (só se ela tiver rodovia).
+        dup: {block: P2.2_DESAPROPRIACAO, ref: "config/g2_content_blocks.yaml#P2.2_DESAPROPRIACAO/matrices/0", fields: [prog, gdp, casa_civil], label_part: 3}
+        expropriation_project: {block: P2.2_DESAPROPRIACAO, ref: "config/g2_content_blocks.yaml#P2.2_DESAPROPRIACAO/matrices/1", fields: [prog, gdp, started], label_part: 4}
+        interferences: {block: P2.2_INTERFERENCIAS, ref: "config/g2_content_blocks.yaml#P2.2_INTERFERENCIAS/matrix", fields: [prog, gfd, utility, started]}
+      # Campos que NÃO são entrada humana: derivados de uma fonte. `prog` (Análise Programa de cada
+      # matriz) é o status da disciplina correspondente na aba Projetos do MESMO snapshot do
+      # texto do 2.2 (sources.projects; DEC-012), com os conjuntos do bloco por rodovia e a mesma
+      # data de referência (inputs.p22_status_reference_date). Evidência: nº 14 × v438, 9 de 12
+      # iguais no status (3 de 12 no texto desde a v0.14: 6 com a ressalva que o publicado omite,
+      # anomalia P2.2_EXTERNAL_PROG_RESSALVA_OMITIDA); as 3 divergências de status contradizem os
+      # próprios bullets 'em análise pelo PROGRAMA' do P2.2_HIGHWAY_BLOCK (anomalia
+      # P2.2_EXTERNAL_PROG_CONTRADIZ_PLANILHA, não regra).
+      derived:
+        prog:
+          source: projects
+          sets: config/data_rules/p22_highway_block.yaml#status_sets
+          reference_date: inputs.p22_status_reference_date
+          confidence: MEDIUM_CONFIDENCE          # um mês (nº 14), 9/12 + 3 anomalias
+          # matriz -> prefixo de Projetos!D (Disciplina, normalizada: NFC, trim, minúsculas).
+          # Exatamente uma linha por rodovia; nenhuma ou mais de uma = PENDING_HUMAN.
+          disciplines:
+            dup: "Documentação para Declaração de Utilidade Pública"
+            expropriation_project: "Projeto de Desapropriação"
+            interferences: "Projeto de Interferência"
+          # conjunto -> texto, na ordem de precedência (1º que contém a linha). `approval`,
+          # `in_analysis` e `not_delivered` = status_sets do bloco por rodovia; `rejected` =
+          # Status (AVALIAÇÃO) 'reprovado' (o mesmo teste de status_sets.pending_approval, sem a
+          # condição da reentrega); `approval_with_reservation` = linha de `approval` com
+          # ressalva pela MESMA regra do P2.2_HIGHWAY_BLOCK (reservation abaixo; DEC-015 estendida
+          # à matriz, modelo v0.14, QA4-H: a v0.13 dizia 'Aprovado' onde o corpo do 2.2 dizia
+          # 'aprovado com ressalva' para a mesma disciplina — inconsistência interna do gerado).
+          # `by_matrix` troca o texto numa matriz:
+          # o 'e encaminhado a GFD' das interferências aprovadas (2 de 2 no nº 14; DEC-007:
+          # NEW_CANDIDATE 'à GFD', não aplicado). As 2 interferências aprovadas da v438 (RD-103,
+          # RD-101) são 'Aprovado com ressalvas' e o nº 14 publicou 'Aprovado e encaminhado a
+          # GFD': o encaminhamento independe da ressalva, e a forma com ressalva o mantém.
+          # O publicado 'Aprovado' para as 6 aprovações com ressalva das matrizes da v438 é a
+          # anomalia P2.2_EXTERNAL_PROG_RESSALVA_OMITIDA (fato da planilha, não regra).
+          reservation: config/data_rules/p22_highway_block.yaml#templates/approval/reservation_qualifier
+          status_text:
+            - {set: approval_with_reservation, text: "Aprovado com ressalva", by_matrix: {interferences: "Aprovado com ressalva e encaminhado a GFD"}}
+            - {set: approval, text: "Aprovado", by_matrix: {interferences: "Aprovado e encaminhado a GFD"}}
+            - {set: rejected, text: "Não aprovado"}
+            - {set: in_analysis, text: "Em análise"}
+            - {set: not_delivered, text: "Não entregue"}
+          unmatched: "linha fora dos conjuntos (situação 'No prazo', 'Aguardando previsão', 'Aguardando início da análise'; avaliação 'parecer emitido' etc.: forma nunca observada) = PENDING_HUMAN com marcador visível"
+          missing_source: "sem a fonte projects = PENDING_HUMAN com marcador visível (nunca a entrada humana no lugar)"
+          input_value: "campo derivado informado na entrada = ignorado com aviso; a planilha prevalece"
+          matrix_roads: "rodovias da matriz = as da entrada (matrix_absent); rodovia com a disciplina na planilha e fora da entrada = aviso"
+      # Sequência de parágrafos de cada bloco: spacer = parágrafo vazio; fixed:N = fixed_parts[N]
+      # do bloco; matrix:<id> = rótulo + item por rodovia + campos. Evidência: DOCX nº 14, ordem
+      # 166–208 (os 3 parágrafos-resíduo 188–190 não entram: deviations do bloco) e 209–231 (o
+      # vazio 231 antes de P2.2_TABLE_CALL não tinha dono; no nº 13, sem estes blocos, a chamada
+      # vem colada ao último item do 2.2).
+      layout:
+        P2.2_DESAPROPRIACAO: [spacer, "fixed:0", "fixed:1", spacer, "fixed:2", "matrix:dup", "matrix:expropriation_project", spacer]
+        P2.2_INTERFERENCIAS: ["fixed:0", spacer, "matrix:interferences", spacer]
+      value: "texto do status, sem pontuação final"
+      punctuation:
+        item: ";"                  # todo item de campo termina em ';'
+        last_item: "."             # o último item da matriz termina em '.' (como P2.2_HIGHWAY_BLOCK)
+        confidence: LOW_CONFIDENCE
+        note: "DEC-007 (texto gerado): no nº 14 a pontuação final é inconsistente ('Aceito' sem ';'; '.' no último campo de cada rodovia só na DUP)"
+      # Campo sem valor NUNCA vira rótulo sozinho: ou a pessoa informa o status, ou declara que não
+      # há informação (sentinela abaixo), ou o bloco fica PENDING_HUMAN com o marcador visível.
+      empty_value: "'' / só espaços ou pontuação / null = PENDING_HUMAN com marcador visível (o rótulo nunca sai sem valor)"
+      missing_field: "campo ausente de uma rodovia presente = PENDING_HUMAN com marcador visível"
+      no_information:
+        # Sentinela: o campo recebe um mapeamento {null_reason: "<motivo>"} em vez do texto. É a
+        # declaração humana explícita de que não há status a informar no fechamento; o motivo
+        # vai para os fatos do bloco (auditoria) e o texto emitido é sempre o padronizado.
+        key: null_reason
+        text: "Sem informação até o fechamento do presente relatório"
+        status: OK                 # declarado por pessoa: não é pendência
+        note: "texto padronizado no vocabulário do relatório ('fechamento do presente relatório', P2.4_RCA_LIST e editorial_defaults.p22_empty_set); null_reason vazio = PENDING_HUMAN"
+      matrix_absent: "rodovia sem a matriz não entra nela; matriz sem rodovia nenhuma não emite nem o rótulo"
+  p24_bm_in_progress: {type: list, required: false, used_by: [P2.4_BM_IN_PROGRESS], default: "derivado das linhas BM de body_rows com Status Entrega != 'Entregue' (config/data_rules/p24_blocks.yaml#P2.4_BM_LIST/adjacent_note); a entrada só acrescenta itens externos (rodovia, código, Mês/AAAA)"}
+  ai_review:
+    type: mapping
+    required: true
+    used_by: [EXECUTIVE_SUMMARY_PARECER_THEMES, P2.4_NC_NATURE]
+    note: >-
+      texto aprovado pela revisão humana (DEC-013), por slot. P2.1_SUMMARY_S2_PADRONIZACAO e
+      P2.1_SUMMARY_S4_TEMAS: obrigatórios quando o slot tem rascunho (sem texto aprovado =
+      PENDING_HUMAN e pauta out_dir/review_brief_<slot>.md). P2.4_NC (cláusula de natureza das
+      NC, componente P2.4_NC_NATURE, optional): opcional; sem texto aprovado a cláusula some
+      (não há rascunho nem pendência).
+  environmental_reference_date:
+    type: date
+    required: false
+    used_by: [P2.4_LICENSE_DASHBOARDS, P2.4_CONDITIONS_TEXT]
+    default: issue_date
+    note: "data de referência do Status ambiental, impressa como 'Atualizado em' (sources.environmental.status_recalculation); sem valor, o builder usa a data de emissão (issue_date) e registra aviso"
+  p22_status_reference_date:
+    type: date
+    required: false
+    used_by: [P2.2_DISCIPLINE_STATUS, P2.2_ROAD_DASHBOARDS]
+    rule: config/data_rules/p22_highway_block.yaml#inputs/status_reference_date
+    default: environmental_reference_date, senão issue_date
+    note: "data impressa 'Atualizado em' no quadro do 2.2 e referência de 'pendentes de aprovação' e do recálculo de 'Atrasado' (Projetos!H usa TODAY()); nenhuma fonte a contém (GAP: entrada humana). Sem valor, o builder usa a cadeia do default e registra aviso"
+
+editorial_defaults:
+  # decisões editoriais com default técnico; a Emmily pode trocar sem mudar código
+  p22_empty_set: {value: "nenhuma disciplina encontra-se em análise no fechamento do presente relatório;", evidence: "16 de 22 ocorrências (WAVE1 §J)", always_emit_line: true}
+  nc_enumeration:
+    value: up_to_4               # único default (p24_text: always_when_present | never | up_to_<N>)
+    enumerate_max: 4
+    confidence: LOW_CONFIDENCE
+    evidence: "reproduz 4/4 meses: enumerou com 4 NC (nº 12) e 2 (nº 13); não enumerou com 8 a 25 (nº 11 e nº 14) — WAVE1 §C; limiar é decisão editorial"
+    rule: config/data_rules/p24_blocks.yaml#P2.4_NC/slots/nc_enum_sentence
+  p21_s7_mode:
+    value: keyword_map           # único default do S7 (p21_text: keyword_map | fixed)
+    confidence: MEDIUM_CONFIDENCE
+    evidence: "texto não afirma tema sem documento: a frase fixa dos nº 12–14 cita temas que nenhum PA do 2.4 sustenta pela Descrição (nº 14: 4/6, sem condicionantes e sem desapropriação; nº 13 4/6; nº 12 3/6) — anomalia P2.1_S7_TEMAS_SEM_SUPORTE; o mapa e a ordem dos temas estão em config/data_rules/p21_executive_summary.yaml#render_maps/p24_pa_themes"
+    rule: config/data_rules/p21_executive_summary.yaml#render_maps/p24_pa_themes
+    alternative: "fixed: os 6 temas sempre, como a frase idêntica dos nº 12–14 (decisão editorial da Emmily; trocar aqui, sem mudar código)"
+  contract_ref: {value: "Contrato N° 00/0000-PARC", evidence: "forma da Apresentação; o Encerramento usa N°01 sem espaço"}
+  # altura de linha do Controle de Produtos: default único em
+  # components[CONTROL_OF_PRODUCTS].render_params.row_height_pt (o builder lê de lá)
+  grammar_standardization: {value: apply_dec_007, note: "corrigir o texto gerado; nunca a citação SOURCE_VERBATIM"}
+
+validations:
+  - {id: V_NUMBER_MONTH_CONSISTENT, rule: "número e mês iguais na capa, Apresentação e Encerramento"}
+  - {id: V_ALL_DOCS_IN_MASTER_LIST, rule: "nenhum código citado fora de body_rows"}
+  - {id: V_ANNEX_COUNT, rule: "annex_count == len(index_rows) == linhas do índice de ANEXOS (DEC-012)"}
+  - {id: V_PAGE_COUNT, rule: "page_count == páginas do PDF final"}
+  - {id: V_NO_DELIVERY_AFTER_ISSUE, rule: "nenhuma Data Entrega posterior à emissão (DEC-006 §5)", severity: warning}
+  - {id: V_WEEK_START_25, rule: "avisar semana iniciada entre 25 e 31 que termina no mês (WAVE1 §D)", severity: warning}
+  - id: V_EMF_FRAME
+    rule: "frame do EMF dentro da tolerância do histórico (DPI da sessão)"
+    severity: warning
+    # rclFrame (largura) e dispositivo de referência do EMR_HEADER de cada recorte do Controle
+    # de Produtos (colunas render_params.columns D:I). A altura varia com as linhas: não entra.
+    expected: {frame_width_mm: 220.91, device_px: [1920, 1080]}
+    tolerance_pct: 0.5
+    confidence: HIGH_CONFIDENCE
+    evidence_months: ["2026-07", "2026-08"]
+    provenance: "DOCX nº 13 e nº 14 publicados: 23/23 EMFs do Controle de Produtos com rclFrame 220,91 mm e dispositivo 1920×1080 px (344×194 mm); reconstruções 13_v6 e 14_v6 idênticas (nº 11–12: colunas e sessão diferentes)"
+
+assets:
+  manifest: config/assets_manifest.yaml
+  # ids e sha1 conferidos pelo validador contra o manifesto; o builder confere o sha1 do arquivo
+  presentation_coordination_strip: {sha1: 5325daf3289ca847d88cbee6f0a6f5db178fc7ae, contains_people_photos: true}
+  landscape_block_01_delivery_periodicity: {sha1: 67db1a285d9301bb94d50661eda5e752d2f45606}
+  landscape_block_02_periodic_reports: {sha1: cddac74e2934c38d00c0abc28d1cf9ba455dc0b1}
+  landscape_block_03_environmental_conditions: {sha1: 75694fba121f7d6a373b9a26d1a31c3e44251a53}
+  landscape_block_04_meeting_minutes: {sha1: ea043a7cbf1ba95dffa3969361f605f752f63c06}
+  landscape_block_05_operational_org_cover: {sha1: 5ff7114ecaa992cce7e1f39f064cbb63d44569a1}
+  landscape_block_06_functional_org_chart: {sha1: 871d7117109490e94967d3cafd5ae7004a42e3d9}
+  landscape_block_07_projects_coordination: {sha1: ccfd5b181db7f38355dd2be4ac43e12c38ac7c8c}
+  landscape_block_08_works_field_coordination: {sha1: c20174d8b3910bd030cfeaaba6aa2697e141c1fb}
+  p22_predecessor_disciplines_diagram: {sha1: bd495352ad78fbca7698216bc1ddfab2d1830e45}
+  cover_photo_background: {sha1: b15a51dbd2a43668cf99d5b23c1ae89c35227b26}
+  cover_logo_prog: {sha1: cd8512a6c1ccc6c6f46aeb1fe858f7412112088f}
+  cover_logos_partners: {sha1: d42dcaf44b53976feb684c1a41b7570b138c3993}
+
+# Componentes na ordem do documento. `blocks` aponta para config/g2_content_blocks.yaml: todo bloco
+# pertence a exatamente um componente (ou a `discontinued`). CONFIRMED exige `evidence_months` (≥ 2).
+components:
+  - component_id: COVER
+    automation_class: TEMPLATE
+    confidence: HIGH_CONFIDENCE
+    render: "DEC-011: fundo estático + textos do Word em posição absoluta (config/ooxml_base.yaml#cover)"
+    assets: [cover_photo_background, cover_logo_prog, cover_logos_partners]
+    fields: [report_number, issue_date]
+    blocks: [COVER]
+    provenance: [DEC-011, "WAVE1 §I"]
+  - component_id: PAGE_GEOMETRY
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    render: "page.sections (config/ooxml_base.yaml#page)"
+    provenance: ["ooxml:nº14 sectPr", "ANATOMY_2026-05_TO_2026-08.md"]
+  - component_id: SECTION_SKELETON
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    render: "3 seções retrato/paisagem/retrato; títulos numerados pelo estilo (config/ooxml_base.yaml#headings, config/ooxml_base.yaml#numbering)"
+    provenance: ["ooxml:nº14", "WAVE1 §I"]
+  - component_id: HEADER
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    render: "config/ooxml_base.yaml#header"
+    provenance: ["ooxml:nº14 header*.xml", "posições conferidas nos PDFs nº 11–14"]
+  - component_id: FOOTER
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-06", "2026-07", "2026-08"]
+    render: "config/ooxml_base.yaml#footer (campo PAGE)"
+    note: "nº 11 sem campo PAGE na seção paisagem (defeito corrigido em junho)"
+    provenance: ["ooxml:nº14 footer*.xml"]
+  - component_id: TOC
+    automation_class: CODE
+    confidence: HIGH_CONFIDENCE
+    render: "config/ooxml_base.yaml#toc (SDT + TOC \\o \"1-3\" \\z \\u \\h; atualizado pelo Word)"
+    blocks: [TOC]
+    provenance: ["ooxml:nº14 body[2]"]
+  - component_id: PRESENTATION_PARAGRAPH
+    automation_class: TEMPLATE
+    confidence: HIGH_CONFIDENCE
+    fields: [report_number, month_label, contract_ref]
+    blocks: [APRES_TITLE, APRES_P1_SELECAO, APRES_P2_CONSORCIO, APRES_P3_IDENTIFICACAO, APRES_P4_OBJETO]
+    provenance: ["content_blocks APRES_*", "WAVE1 §J"]
+  - component_id: PRESENTATION_LOGO
+    automation_class: STATIC_ASSET
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    asset: presentation_coordination_strip
+    blocks: [APRES_LOGO_GRUPOS]
+    note: "faixa de 5 fotos com pessoas, não logotipo"
+    provenance: ["WAVE1 §I", "assets_manifest"]
+  - component_id: FIXED_BODY_TEXT
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    render: "texto literal do bloco (FIXED_TEXT) pelo motor de blocos, na posição `seq` de cada um; padronização DEC-007"
+    note: "títulos, subtítulos, cabeçalhos de citação, parágrafos fixos e espaçadores; cada bloco idêntico em ≥ 2 meses (evidence.identical_in)"
+    blocks: [CH2_TITLE, CH2_INTRO, CH2_ATIV_LEAD, CH2_ATIV_LIST,
+             P2.1_TITLE, P2.1_H3_DESCRICAO, P2.1_QUOTE_INTRO, P2.1_SPACER, P2.1_H3_PRODUTOS,
+             P2.1_COORD_P1, P2.1_COORD_P2, P2.1_MEETINGS_LEAD, P2.1_ATAS_REALOC, P2.1_EQUIPE,
+             P2.1_CAMPO, P2.1_CRONO_LEAD, P2.1_CRONO_LIST, P2.1_CRONO_CALL,
+             P2.2_TITLE, P2.2_H3_DESCRICAO, P2.2_QUOTE_INTRO, P2.2_H3_PRODUTOS,
+             P2.2_PREDECESSORAS_LEAD, P2.2_GRUPOS_LEAD, P2.2_GRUPOS_LIST, P2.2_NIVEIS_LEAD,
+             P2.2_NIVEIS_LIST, P2.2_QUADRO_LEAD,
+             P2.3_TITLE, P2.3_H3_DESCRICAO, P2.3_QUOTE_INTRO, P2.3_SPACER, P2.3_H3_PRODUTOS,
+             P2.4_TITLE, P2.4_H3_DESCRICAO, P2.4_QUOTE_INTRO, P2.4_H3_PRODUTOS, P2.4_RO_LEAD,
+             P2.5_TITLE, P2.5_H3_DESCRICAO, P2.5_QUOTE_INTRO, P2.5_SPACER, P2.5_H3_PRODUTOS,
+             P2.6_TITLE, P2.6_H3_DESCRICAO, P2.6_QUOTE_INTRO, P2.6_SPACER, P2.6_H3_PRODUTOS,
+             ENC_SPACERS]
+    provenance: ["WAVE1 §J (118 blocos)", "content_blocks evidence.identical_in"]
+  - component_id: CONTRACT_QUOTE_P2X
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    render: "SOURCE_VERBATIM; 3 parágrafos por produto, byte a byte"
+    blocks: [P2.1_QUOTE, P2.2_QUOTE, P2.3_QUOTE, P2.4_QUOTE, P2.5_QUOTE, P2.6_QUOTE]
+    provenance: [DEC-007, "WAVE1 §J (24/24)"]
+  - component_id: LANDSCAPE_BLOCK
+    automation_class: STATIC_ASSET
+    confidence: MEDIUM_CONFIDENCE   # largura limitada à área útil é MEDIUM (GAP-004); assets em si CONFIRMED
+    evidence_months: ["2026-06", "2026-07", "2026-08"]
+    assets: [landscape_block_01_delivery_periodicity, landscape_block_02_periodic_reports, landscape_block_03_environmental_conditions, landscape_block_04_meeting_minutes, landscape_block_05_operational_org_cover, landscape_block_06_functional_org_chart, landscape_block_07_projects_coordination, landscape_block_08_works_field_coordination]
+    render: "seção 1; uma imagem por página, inline, centralizada; largura por config/g2_report_model.yaml#positioning/landscape_width (GAP-004: hoje 2 imagens excedem)"
+    note: "8 imagens desde o nº 12 (nº 11 tinha 5: TRUE_CHANGE)"
+    blocks: [P2.1_LANDSCAPE_BLOCK]
+    provenance: ["WAVE1 §I", "assets_manifest"]
+  - component_id: EXECUTIVE_SUMMARY
+    automation_class: TEMPLATE
+    confidence: MEDIUM_CONFIDENCE    # S7 por palavra-chave (MEDIUM) é o menor bloco
+    source: master_list
+    render: "config/data_rules/p21_executive_summary.yaml#paragraphs (slots S0–S8; ≈90% fixo ou derivável, GAP-005)"
+    blocks: [P2.1_SUMMARY_S0_ESCOPO, P2.1_SUMMARY_S1_P21, P2.1_SUMMARY_S3_P22, P2.1_SUMMARY_S5_P24, P2.1_SUMMARY_S6_MEDICOES, P2.1_SUMMARY_S7_PARECERES_P24, P2.1_SUMMARY_S8_FECHO]
+    provenance: ["WAVE1 §K", "content_blocks P2.1_SUMMARY_*"]
+  - component_id: EXECUTIVE_SUMMARY_PARECER_THEMES
+    automation_class: AI_SYNTHESIS
+    confidence: MEDIUM_CONFIDENCE
+    allowed_sources: ["master_list.body_rows (Descrição dos PA/IT/CT/POP do relatório)", "conteúdo dos documentos do relatório, somente leitura"]
+    human_review: true
+    input: ai_review
+    render: "DEC-013: texto aprovado ou rascunho determinístico (config/data_rules/p21_executive_summary.yaml#render_maps/p22_pa_themes_draft, config/data_rules/p21_executive_summary.yaml#render_maps/standardization)"
+    blocks: [P2.1_SUMMARY_S2_PADRONIZACAO, P2.1_SUMMARY_S4_TEMAS]
+    provenance: ["WAVE1 §K", DEC-013]
+  - component_id: P2.1_MEETINGS_AGENDA
+    automation_class: MANUAL_INPUT
+    confidence: HIGH_CONFIDENCE
+    input: meetings_agenda
+    note: "dia derivável das atas; executora da aba Painel de Controle; hora externa"
+    blocks: [P2.1_MEETINGS_LIST]
+    provenance: ["WAVE1 §K"]
+  - component_id: TABLE_CALL_SENTENCE
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    presence: product_has_rows
+    blocks: [P2.1_TABLE_CALL, P2.2_TABLE_CALL, P2.4_TABLE_CALL]
+    provenance: ["WAVE1 §J"]
+  - component_id: CONTROL_OF_PRODUCTS
+    automation_class: STRUCTURED_DATA
+    confidence: CONFIRMED
+    evidence_months: ["2026-07", "2026-08"]
+    source: master_list
+    presence: product_has_rows
+    render: "DEC-010: EMF xlScreen, um por página, cabeçalho repetido, 17,5 cm; corpo = body_rows do produto"
+    render_params:
+      sheet: "Controle Geral"
+      columns: "D:I"              # intervalo copiado (B:M só para o autofiltro)
+      header_rows: [1, 3]         # título + cabeçalho, repetidos em cada recorte
+      filter_columns: "B:M"
+      # DEC-010 §4 (revisão 2026-10-02, builder MM): altura de cada linha = max(row_height_pt,
+      # AutoFit do Excel nas colunas `columns`, na cópia em memória). 27,6 pt é o MÍNIMO (padrão
+      # do nº 14); descrição de 3+ linhas cresce e nunca corta (nº 13: NT-688.1/PA-672.1; nº 14:
+      # NT-734.1/NT-765.1). A paginação usa as alturas reais por linha (medidas via COM na 1ª
+      # passada; offline, `row_height_estimate`).
+      row_height_pt: 27.6         # mínimo (DEC-010 §4, padrão do nº 14; MEDIUM)
+      row_height_mode: min_autofit
+      # Estimador OFFLINE do AutoFit (sem Excel; testes e fallback): linhas = quebra por palavra
+      # com `chars_per_line` caracteres por coluna com quebra automática (campos de
+      # MasterListRow: Manifestação E, Descrição F, Status Entrega I); altura = max(mínimo,
+      # line_height_pt × maior nº de linhas). Calibração 2026-10-02 contra o AutoFit real de
+      # 2513 linhas da Lista Mestra v134.0 e v335.0 (Arial Nova Cond 11/10 pt, 120 dpi): 2510
+      # iguais (±2,5 pt), 3 superestimadas, 0 subestimadas.
+      row_height_estimate:
+        line_height_pt: 13.8
+        chars_per_line: {manifestation: 29, description: 53, delivery_status: 21}
+      width_cm: 17.5
+      avail_height_cm: 26.2
+      paragraph_spacing_pt: 0     # parágrafo do EMF com espaçamento simples, 0 antes/depois
+      aspect: frame               # altura pelo rclFrame (erro ≤ 0,12% contra o histórico)
+      balance: true               # distribui as linhas por igual entre as páginas necessárias
+      # DEC-010 §3 (1º recorte): o 1º recorte começa na página da frase de chamada, no espaço
+      # livre medido no PDF da 1ª passada (nº 14 p24: frase e 25 linhas na mesma página). Se não
+      # couberem `first_slice_min_rows` linhas, desce com a frase (keep-with-next). A folga
+      # cobre o espaçamento após a frase (6 pt) e o arredondamento do Word (medido 0,11 cm).
+      first_slice_fill: true
+      first_slice_min_rows: 3     # nº 14 2.4: frase no pé da página, tabela na seguinte
+      first_slice_gap_cm: 0.3
+      # DEC-007: negrito das linhas de dados herdado da planilha (formatação de célula, não
+      # dado) sai; só título e cabeçalho ficam em negrito. QA-D nº 14: 194 spans em negrito na
+      # 2ª coluna do gerado, 0 na referência. Só na cópia em memória; a planilha nunca é salva.
+      normalize_data_font: true
+    blocks: [P2.1_CONTROLE_PRODUTOS, P2.2_CONTROLE_PRODUTOS, P2.4_CONTROLE_PRODUTOS]
+    provenance: [DEC-006, DEC-010, DEC-012, "WAVE1 §A, §H"]
+  - component_id: P2.2_MEETING_ROUTINE
+    automation_class: TEMPLATE
+    confidence: HIGH_CONFIDENCE
+    source: master_list
+    fields: [atas_clause]
+    render: "cláusula das Atas ⇔ existe AT no 2.1 (config/data_rules/p21_executive_summary.yaml#render_maps/atas_clause/trigger)"
+    blocks: [P2.2_ROTINA_REUNIOES]
+    provenance: ["WAVE1 §K (cláusula das Atas ⇔ AT no 2.1)", "content_blocks P2.2_ROTINA_REUNIOES"]
+  - component_id: P2.2_PREDECESSOR_DIAGRAM
+    automation_class: STATIC_ASSET
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    asset: p22_predecessor_disciplines_diagram
+    blocks: [P2.2_PREDECESSORAS_IMG]
+    provenance: ["assets_manifest"]
+  - component_id: P2.2_DISCIPLINE_STATUS
+    automation_class: STRUCTURED_DATA
+    confidence: MEDIUM_CONFIDENCE
+    source: projects
+    render: "config/data_rules/p22_highway_block.yaml#templates com os conjuntos config/data_rules/p22_highway_block.yaml#status_sets e a presença config/data_rules/p22_highway_block.yaml#line_presence (ordem config/data_rules/p22_highway_block.yaml#road_order)"
+    note: "títulos, grupos e aceitação/aprovação/em análise HIGH; 'pendentes de aprovação' MEDIUM (um mês, regra com um parâmetro sobre coluna digitada); ressalva por disciplina na Aprovação (v0.13); data de referência = inputs.p22_status_reference_date"
+    blocks: [P2.2_HIGHWAY_BLOCK]
+    provenance: ["SOURCE_LINEAGE.md P2.2", "WAVE1 §N", DEC-015]
+  - component_id: P2.2_ROAD_DASHBOARDS
+    automation_class: RECONSTRUCTED_VISUAL
+    confidence: MEDIUM_CONFIDENCE
+    note: "células 100% (v437–v439); layout HIGH, tipografia e larguras de coluna MEDIUM (render rules)"
+    source: projects
+    render: "config/g2_render_rules.yaml#P2.2_ROAD_DASHBOARDS"
+    provenance: [DEC-009, "WAVE1 §L"]
+  - component_id: P2.2_EXTERNAL_STATUS
+    automation_class: MANUAL_INPUT
+    confidence: MEDIUM_CONFIDENCE
+    input: p22_external_status
+    source: projects                 # campos `prog` (inputs.p22_external_status.schema.derived)
+    note: "GDP, Casa Civil, GFD, concessionária e início dos processos = entrada humana; Análise Programa derivada da aba Projetos (QA2-E)"
+    blocks: [P2.2_DESAPROPRIACAO, P2.2_INTERFERENCIAS]
+    provenance: ["GAP-009", "WAVE1 §H, §E", "QA2-E (prog derivado da planilha de projetos)"]
+  - component_id: P2.2_EXPROPRIATION_LAYOUT
+    automation_class: TEMPLATE
+    confidence: MEDIUM_CONFIDENCE
+    presence: p22_external_status_present
+    fields: [p22_external_status]
+    render: "config/g2_content_blocks.yaml#P2.2_DESAPROPRIACAO/fixed_parts (um mês de evidência; GAP-006)"
+    provenance: ["GAP-006", "WAVE1 §J"]
+  - component_id: NO_ACTIVITY_SENTENCE
+    automation_class: CODE
+    confidence: HIGH_CONFIDENCE
+    presence: product_has_no_rows
+    blocks: [P2.3_NO_ACTIVITY, P2.5_NO_ACTIVITY, P2.6_NO_ACTIVITY]
+    note: "texto CONFIRMED; a condição nunca alternou na janela (revisão H)"
+    # Produtos cuja frase de ausência NUNCA sai (QA2-E). O 2.1 (coordenação) teve documento em
+    # todo relatório observado (nº 01–14) e a narrativa de coordenação e a agenda de reuniões
+    # (P2.1_MEETINGS_LIST) saem sempre: 'não houve atividades relacionadas ao produto 2.1' ao
+    # lado delas se contradiz. Mês sem documento do produto: o Controle de Produtos e a chamada
+    # da tabela somem (product_has_rows) e o slot P<produto>_NO_ACTIVITY vira `status` com o
+    # `warning` (marcador visível; nunca a frase de ausência).
+    never_for:
+      "2.1": {status: PENDING_HUMAN, warning: "2.1 sem documento na Lista Mestra — confirmar", confidence: HIGH_CONFIDENCE}
+    provenance: ["WAVE1 §J, §H"]
+  - component_id: CONTRACT_HIGHWAY_TEXT
+    automation_class: TEMPLATE
+    confidence: CONFIRMED
+    evidence_months: ["2026-06", "2026-07", "2026-08"]
+    source: contract
+    fields: [highways_enum_ro, gamb_process]
+    render: "rodovias de contract.highways na ordem do bloco (ORDER_RO, ORDER_GAMB)"
+    blocks: [P2.4_RO_INTRO, P2.4_GAMB]
+    provenance: ["content_blocks P2.4_RO_INTRO (nº 12–14), P2.4_GAMB (nº 11–14)"]
+  - component_id: WEEKLY_REPORT_CUTOFF
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-07", "2026-08"]
+    source: master_list
+    render: "faixa por rodovia = 1º e último código RO de body_rows; período = min/max de Período; 'até o dia 25' é texto fixo"
+    blocks: [P2.4_RO_PERIODO, P2.4_RO_LIST]
+    provenance: ["WAVE1 §D (76/76; GAP-010 resolvido)"]
+  - component_id: P2.4_DOCUMENT_CITATIONS
+    automation_class: STRUCTURED_DATA
+    confidence: HIGH_CONFIDENCE
+    source: master_list
+    render: "config/data_rules/p24_blocks.yaml#P2.4_RM, config/data_rules/p24_blocks.yaml#P2.4_BM_LEAD, config/data_rules/p24_blocks.yaml#P2.4_BM_LIST, config/data_rules/p24_blocks.yaml#P2.4_RI, config/data_rules/p24_blocks.yaml#P2.4_RA"
+    note: "fatos 100% nos nº 13–14; formas e ordens HIGH na spec (ordem RM)"
+    blocks: [P2.4_RM, P2.4_BM_LEAD, P2.4_BM_LIST, P2.4_RI, P2.4_RA]
+    provenance: ["WAVE1 §D, §O"]
+  - component_id: P2.4_RCA_CITATIONS
+    automation_class: STRUCTURED_DATA
+    confidence: MEDIUM_CONFIDENCE
+    source: master_list
+    render: "config/data_rules/p24_blocks.yaml#P2.4_RCA_HEAD, config/data_rules/p24_blocks.yaml#P2.4_RCA_LIST"
+    note: "texto CONFIRMED; presença sem RCA nunca ocorreu (MEDIUM); letra digitada e só rodovias com envio desde o nº 13 (bloco MEDIUM)"
+    blocks: [P2.4_RCA_HEAD, P2.4_RCA_LIST]
+    provenance: ["WAVE1 §O"]
+  - component_id: P2.4_BM_IN_PROGRESS
+    automation_class: MANUAL_INPUT
+    confidence: MEDIUM_CONFIDENCE
+    optional: true
+    input: p24_bm_in_progress
+    default: "config/data_rules/p24_blocks.yaml#P2.4_BM_LIST/adjacent_note (linhas BM 'Em elaboração' do relatório)"
+    render: "lead fixo + lista de config/data_rules/p24_blocks.yaml#P2.4_BM_LIST/template em instância de lista nova"
+    blocks: [P2.4_BM_EM_ELABORACAO]
+    provenance: ["WAVE1 §M (v162: 6 linhas 'Em elaboração')", "content_blocks P2.4_BM_EM_ELABORACAO"]
+  - component_id: P2.4_OPINION_PARAGRAPHS
+    automation_class: CODE
+    confidence: MEDIUM_CONFIDENCE
+    source: master_list
+    render: "presença e temas por palavra-chave na Descrição dos PA (config/data_rules/p24_blocks.yaml#P2.4_PARECERES_MEDICAO/slots/themes; config/data_rules/p24_blocks.yaml#P2.4_PARECERES_MEDICAO_2/slots; config/data_rules/p24_blocks.yaml#P2.4_PARECERES_AMB/slots/themes)"
+    note: "moldura HIGH (nº 13–14, com '..' do nº 13 como anomalia); cada tema dos três blocos só sai com PA que o sustente (P2.4_PARECERES_MEDICAO_ATESTE_SEM_PA, P2.4_PARECERES_MEDICAO_2_TEMAS_SEM_SUPORTE, P2.4_PARECERES_AMB_TEMAS_SEM_SUPORTE); MEDICAO_2 sem tema analisado não sai; presença MEDIUM (nunca falsa na janela)"
+    blocks: [P2.4_PARECERES_MEDICAO, P2.4_PARECERES_MEDICAO_2, P2.4_PARECERES_AMB]
+    provenance: ["WAVE1 §O", "QA2-C do Gate D (temas por palavra-chave)"]
+  - component_id: P2.4_MEETING_MINUTES_PARAGRAPH
+    automation_class: CODE
+    confidence: MEDIUM_CONFIDENCE
+    source: master_list
+    render: "presença = existe AT no 2.4; temas por palavra-chave na Descrição das AT (config/data_rules/p24_blocks.yaml#P2.4_ATAS/slots/themes), opcionais: sem tema sustentado sai só a moldura factual"
+    note: "moldura CONFIRMED (nº 12–14; nº 11 = moldura sem 'ainda'); os dez temas da frase fixa não têm AT que os sustente na janela (P2.4_ATAS_TEMAS_SEM_SUPORTE); mapa de palavras-chave MEDIUM (nunca observado com tema)"
+    blocks: [P2.4_ATAS]
+    provenance: ["WAVE1 §O", "QA2-C do Gate D (Descrição das AT na Lista Mestra v335/v134)"]
+  - component_id: P2.4_NONCONFORMITY_PARAGRAPH
+    automation_class: TEMPLATE
+    confidence: MEDIUM_CONFIDENCE
+    source: master_list
+    render: "frase fixa config/data_rules/p24_blocks.yaml#P2.4_NC/slots/nc_base + frase de RNC config/data_rules/p24_blocks.yaml#P2.4_NC/slots/rnc_sentence; a enumeração é P2.4_NC_ENUMERATION e a natureza P2.4_NC_NATURE"
+    note: "base CONFIRMED; RNC MEDIUM (forma de 1 trecho nunca observada); a variante truncada/'Consolidade' dos nº 13–14 é anomalia, nunca emitida"
+    blocks: [P2.4_NC]
+    provenance: ["WAVE1 §C"]
+  - component_id: P2.4_NC_ENUMERATION
+    automation_class: CODE
+    confidence: LOW_CONFIDENCE
+    source: master_list
+    render: "config/data_rules/p24_blocks.yaml#P2.4_NC/slots/nc_enum_sentence, ligado por editorial_defaults.nc_enumeration (up_to_4)"
+    note: "frase de enumeração das NC do período dentro de P2.4_NC; limiar editorial (LOW), formato MEDIUM"
+    provenance: ["WAVE1 §C"]
+  - component_id: P2.4_NC_NATURE
+    automation_class: AI_SYNTHESIS
+    confidence: LOW_CONFIDENCE
+    optional: true
+    allowed_sources: ["master_list.body_rows (Descrição das NC do 2.4: 'Notificação de Natureza {X}')", "conteúdo das NC do relatório, somente leitura"]
+    human_review: true
+    input: ai_review
+    review_key: P2.4_NC
+    render: "cláusula config/data_rules/p24_blocks.yaml#P2.4_NC/slots/nc_enum_sentence/nc_nature_clause do slot config/g2_content_blocks.yaml#P2.4_NC/slots/nc_period_sentence; vazia sem texto aprovado (DEC-013); só sai com a enumeração"
+    without_review: "cláusula omitida; não gera rascunho nem PENDING_HUMAN (optional)"
+    note: "observada só no nº 12 (natureza de obra); ausente nos nº 13–14"
+    provenance: ["WAVE1 §C", DEC-013]
+  - component_id: P2.4_LICENSE_DASHBOARDS
+    automation_class: RECONSTRUCTED_VISUAL
+    confidence: LOW_CONFIDENCE
+    source: environmental
+    render: "config/g2_render_rules.yaml#P2.4_ENV_INDICES_PANEL e config/g2_render_rules.yaml#P2.4_CONDITIONS_PANELS"
+    note: "contagens CONFIRMED nos nº 11–14; layout HIGH, tipografia MEDIUM; slot de pendentes do painel de condicionantes LOW (nunca observado) — o componente fica no menor nível declarado"
+    provenance: [DEC-009, "WAVE1 §B, §L"]
+  - component_id: P2.4_PENDING_LICENSES_TEXT
+    automation_class: STRUCTURED_DATA
+    confidence: MEDIUM_CONFIDENCE
+    source: environmental
+    render: "config/data_rules/p24_blocks.yaml#P2.4_LIC_LEAD e config/data_rules/p24_blocks.yaml#P2.4_LIC_LIST"
+    note: "seleção CONFIRMED 4/4; ordem e redação MEDIUM"
+    blocks: [P2.4_LIC_HEAD, P2.4_LIC_LEAD, P2.4_LIC_LIST]
+    provenance: ["WAVE1 §B, §O"]
+  - component_id: P2.4_CONDITIONS_TEXT
+    automation_class: STRUCTURED_DATA
+    confidence: MEDIUM_CONFIDENCE
+    source: environmental
+    render: "0 próximas → 'Não apresenta…'; 1 → 'apenas uma…'; >1 → 'algumas…' (config/data_rules/p24_blocks.yaml#P2.4_LAU_LEAD, config/data_rules/p24_blocks.yaml#P2.4_LAU_LIST)"
+    note: "forma zero CONFIRMED; formas 1 e >1 só no nº 14"
+    blocks: [P2.4_LAU_HEAD, P2.4_LAU_LEAD, P2.4_LAU_LIST]
+    provenance: ["WAVE1 §B"]
+  - component_id: CLOSING_PARAGRAPH
+    automation_class: TEMPLATE
+    confidence: HIGH_CONFIDENCE
+    fields: [report_number, month_label, contract_ref, page_count, annex_count]
+    blocks: [ENC_TITLE, ENC_P1]
+    provenance: ["WAVE1 §J"]
+  - component_id: CLOSING_PAGE_COUNT
+    automation_class: CODE
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    render: "páginas do PDF final, numeral por extenso feminino; exige segunda passada com o Word"
+    provenance: ["WAVE1 §J"]
+  - component_id: CLOSING_ANNEX_COUNT
+    automation_class: CODE
+    confidence: HIGH_CONFIDENCE
+    source: master_list
+    render: "len(index_rows), numeral por extenso masculino (DEC-012)"
+    note: "o filtro de status do índice só foi exercitado em julho (em agosto é neutro)"
+    provenance: [DEC-012, "WAVE1 §M"]
+  - component_id: SIGNATURE_DATE
+    automation_class: MANUAL_INPUT
+    confidence: HIGH_CONFIDENCE
+    input: signature_date
+    blocks: [ENC_DATE]
+    provenance: ["WAVE1 §J"]
+  - component_id: SIGNATURE_TABLE
+    automation_class: TEMPLATE
+    confidence: CONFIRMED
+    evidence_months: ["2026-05", "2026-06", "2026-07", "2026-08"]
+    fields: [signatory_name]
+    blocks: [ENC_SIGNATURE_TABLE]
+    provenance: ["WAVE1 §J"]
+  - component_id: ANNEX_COMPOSITION
+    automation_class: STRUCTURED_DATA
+    confidence: HIGH_CONFIDENCE
+    source: master_list
+    render: "índice consolidado = index_rows, EMF por página (DEC-010); pastas /G2/Anexos/<Produto>/<Tipo>/<Rodovia>/"
+    note: "filtro 'Status Entrega == Entregue' só exercitado em julho (6 linhas); coluna do filtro MEDIUM"
+    blocks: [ANEXOS_TITLE, ANEXOS_CONTROLE_CONSOLIDADO]
+    provenance: [DEC-006, DEC-010, DEC-012]
+
+discontinued:
+  - {component_id: P2.2_PANEL_EMF_DISCONTINUED, reason: "existiu em maio e junho; DEC-009 diz que não volta"}
+  - {component_id: P2.4_NONCONFORMITY_PANEL, reason: "não existe em nenhum relatório nº 01–14 (WAVE1 §C)"}
+  - {component_id: P2.4_TCE_BLOCK, blocks: [P2.4_TCE_BLOCK], reason: "mesa técnica TCE-UF só nos nº 11–12; removido a partir de Julho/2026 (TRUE_CHANGE)"}
+
+merged_into:
+  PRODUCT_TABLE_REPRESENTATION: CONTROL_OF_PRODUCTS

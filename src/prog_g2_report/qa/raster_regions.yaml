@@ -1,0 +1,63 @@
+# Regiões de texto/numerais dos painéis raster — configuração do COMPARADOR (régua), não do
+# builder. Mudar caixas ou limites é mover a régua: exige nova `version` e recalibração.
+#
+# Coordenadas: fração da LARGURA do painel, a partir do canto superior esquerdo: [x0, y0, x1, y1].
+# (Em largura também na vertical: o painel gerado pode ser mais alto — tabela completa, DEC-009 —
+# e o topo continua alinhado.)
+#
+# Medida (compare.region_delta): mapa de tinta do extrator (96 colunas, 300 dpi, fundo local
+# por mediana de blocos, o que neutraliza fundo liso x foto); a região é dividida em subcélulas
+# de `subcell` x `subcell` células do mapa (~3 % da largura) e o delta da região é a maior
+# diferença de fração de tinta entre subcélulas pareadas. `shift_rows`/`shift_cols` > 0 deixam
+# cada faixa casar com a referência deslocada — medido: numa região de 4 a 5 células de altura
+# isso apaga o sinal (data trocada 0,056 contra 0,055 do controle), por isso fica 0.
+#
+# Calibração (v1.0, 2026-10-02): pares reais nº 14 (gerado 14_v4 x publicado) e nº 13 (13_main x
+# publicado), 2 painéis de índices, 8 de condicionantes, 8 quadros. `max_delta` = maior delta
+# do controle (`measured`) + margem (o maior entre 0,03 e metade do medido).
+# Discriminação medida (gerado 14_v4 com o dado pintado por cima, QA2-E):
+#   índices · "Atualizado em" trocado: 0,182 (limite 0,065) — pega;
+#   índices · KPI "Licenças Pendentes" 8 -> 3: 0,080 (limite 0,065) — pega, margem curta;
+#   condicionantes · KPIs: ruído legítimo de até 0,13 (fonte/posição reconstruídas) — troca de
+#   1 dígito NÃO é garantida;
+#   quadros do 2.2.2 · células da tabela: ruído legítimo 0,2+ (quebra de linha, formato de
+#   data) — NÃO entram; célula trocada não é verificável aqui.
+# O que não é discriminável fica com o QA de fonte (os painéis são gerados das planilhas).
+#
+# Seletor (abas de rodovia do Power BI): a aba destacada é a de menor cinza médio, se for mais
+# escura que a segunda por pelo menos `min_contrast` níveis; sem isso, nenhuma aba destacada.
+# Controle (nº 13 e nº 14, gerado e publicado): contraste 9,2–25 níveis nos painéis com rodovia
+# selecionada; <= 2 no painel geral (nenhuma aba destacada).
+
+version: "1.0"
+subcell: 3
+shift_rows: 0
+shift_cols: 0
+
+anchors:
+  # posição na âncora (1, 2, ...) -> tipo de painel; o último tipo vale para as posições seguintes
+  "2.2.2": [quadro_projetos]
+  "2.4.2": [indices_ambientais, condicionantes]
+
+kinds:
+  quadro_projetos:
+    regions:
+      atualizado_em: {box: [0.01, 0.11, 0.20, 0.16], max_delta: 0.27, measured: 0.177}
+  indices_ambientais:
+    selector: {box: [0.011, 0.012, 0.246, 0.036], cells: 4, min_contrast: 5}
+    regions:
+      atualizado_em: {box: [0.80, 0.008, 0.93, 0.050], max_delta: 0.065, measured: 0.034}
+      kpi_total: {box: [0.12, 0.080, 0.23, 0.135], max_delta: 0.071, measured: 0.041}
+      kpi_emitidas: {box: [0.45, 0.080, 0.56, 0.135], max_delta: 0.096, measured: 0.064}
+      kpi_pendentes: {box: [0.78, 0.080, 0.88, 0.135], max_delta: 0.065, measured: 0.035}
+      barras_por_rodovia: {box: [0.04, 0.17, 0.30, 0.20], max_delta: 0.15, measured: 0.100}
+  condicionantes:
+    selector: {box: [0.011, 0.012, 0.246, 0.036], cells: 4, min_contrast: 5}
+    regions:
+      atualizado_em: {box: [0.80, 0.010, 0.93, 0.050], max_delta: 0.104, measured: 0.069}
+      kpi_finalizadas: {box: [0.17, 0.150, 0.24, 0.195], max_delta: 0.176, measured: 0.117}
+      kpi_no_prazo: {box: [0.42, 0.150, 0.48, 0.195], max_delta: 0.072, measured: 0.042}
+      kpi_pendentes: {box: [0.63, 0.150, 0.70, 0.195], max_delta: 0.192, measured: 0.128}
+      kpi_proximo_vencer: {box: [0.92, 0.150, 0.99, 0.195], max_delta: 0.194, measured: 0.129}
+      rodovia_da_barra: {box: [0.0, 0.29, 0.07, 0.33], max_delta: 0.063, measured: 0.033}
+      valor_da_barra: {box: [0.52, 0.29, 0.60, 0.33], max_delta: 0.20, measured: 0.134}

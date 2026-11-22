@@ -1,0 +1,647 @@
+# OOXML de base do Relatório G2 — DADO declarativo para o builder (do Document() vazio).
+# Promovido de tmp/agent_I/ooxml_base.yaml e tmp/agent_I/cover_ooxml.yaml (agente I, WAVE1 §I),
+# com as correções da revisão adversarial (WAVE1 §H). Nada aqui é XML literal copiado do DOCX:
+# cada bloco é a especificação mínima que prog_g2_report.builder.foundation / .cover serializam.
+#
+# Unidades: as do próprio OOXML, para não haver conversão com perda.
+#   twip (dxa) = 1/20 pt = 1/1440 pol (566,93 twip = 1 cm);  meio-ponto (sz) = 1/2 pt;
+#   EMU (capa, coordenadas do slide) = 1/914400 pol.
+# Convenção de pPr/rPr: `true` = elemento vazio (<w:b/>); escalar = w:val; mapa = atributos
+# (ou filhos, para numPr/tabs/tblCellMar/…). A ordem dos filhos é imposta pelo serializador
+# conforme o schema (ECMA-376), não pela ordem do YAML.
+#
+# Cada bloco: `provenance` (onde está no nº 14) e `confidence`. Componentes do modelo
+# (config/g2_report_model.yaml): PAGE_GEOMETRY, SECTION_SKELETON, HEADER, FOOTER, TOC, COVER.
+
+_meta:
+  name: ooxml_base
+  version: "1.0"
+  reference: "Relatório G2 nº 14 — Agosto/2026"
+  evidence: ["tmp/agent_I/ooxml_base.yaml", "tmp/agent_I/cover_ooxml.yaml", "docs/discovery/WAVE1_FINDINGS.md §H §I", "DEC-011"]
+  rule: "o DOCX histórico é evidência e medida, nunca template"
+
+# ----------------------------------------------------------------------------------- tema
+theme:
+  provenance: "nº 14 word/theme/theme1.xml (a:clrScheme 'Programa', a:fontScheme 'Tema 2023')"
+  confidence: CONFIRMED
+  note: "o tema padrão do python-docx é Calibri/Office; o builder reescreve clrScheme e fontScheme"
+  font_scheme_name: "Tema 2023"
+  major_latin: "Arial Nova Cond"        # títulos e cabeçalho (majorHAnsi)
+  minor_latin: "Arial Nova Light"       # corpo (minorHAnsi) — revisão H: NÃO é Arial Nova Cond
+  color_scheme_name: Programa
+  colors:                               # ordem do schema: dk1 lt1 dk2 lt2 accent1..6 hlink folHlink
+    dk1: {srgb: "080808"}
+    lt1: {sys: window, last: FFFFFF}
+    dk2: {srgb: 8CC3E1}
+    lt2: {srgb: 1F4993}
+    accent1: {srgb: 1C5560}
+    accent2: {srgb: 80BCA3}
+    accent3: {srgb: E6AC27}
+    accent4: {srgb: BF4D28}
+    accent5: {srgb: D9D9CF}
+    accent6: {srgb: "655643"}
+    hlink: {srgb: 01203F}
+    folHlink: {srgb: F6F7ED}
+
+# ------------------------------------------------------------------------------ settings
+settings:
+  provenance: "nº 14 word/settings.xml"
+  confidence: CONFIRMED
+  values:
+    zoom: {percent: 110}
+    embedTrueTypeFonts: true
+    embedSystemFonts: true
+    saveSubsetFonts: true
+    defaultTabStop: 708
+    hyphenationZone: 425
+    characterSpacingControl: doNotCompress
+    updateFields: true                  # builder: o Word atualiza TOC/PAGE ao abrir (não observado no nº 14)
+    themeFontLang: {val: pt-BR, eastAsia: ja-JP, bidi: ar-SA}
+    decimalSymbol: ","
+    listSeparator: ";"
+  compat:                               # w:compat/w:compatSetting (uri http://schemas.microsoft.com/office/word)
+    compatibilityMode: 15
+    overrideTableStyleFontSizeAndJustification: 1
+    enableOpenTypeFeatures: 1
+    doNotFlipMirrorIndents: 1
+    differentiateMultirowTableHeaders: 1
+    useWord2013TrackBottomHyphenation: 0
+  remove: [savePreviewPicture]          # resíduo do template do python-docx, ausente no nº 14
+  notes:
+    updateFields: "decisão do builder (BUILDER_PLAN: TOC e PAGE exigem o Word); confidence do valor: HIGH"
+
+# ---------------------------------------------------------------------------- fontTable
+font_table:
+  provenance: "nº 14 word/fontTable.xml (subconjunto usado pelo builder)"
+  confidence: HIGH
+  note: "o Word reescreve a tabela ao salvar; os embeds (embedRegular/Bold/Italic) só o Word grava"
+  fonts:
+    - {name: "Times New Roman", panose1: "02020603050405020304", charset: "00", family: roman, pitch: variable}
+    - {name: "Symbol", panose1: "05050102010706020507", charset: "02", family: roman, pitch: variable}
+    - {name: "Courier New", panose1: "02070309020205020404", charset: "00", family: modern, pitch: fixed}
+    - {name: "Wingdings", panose1: "05000000000000000000", charset: "02", family: auto, pitch: variable}
+    - {name: "Arial Nova Light", charset: "00", family: swiss, pitch: variable}
+    - {name: "Arial Nova Cond", charset: "00", family: swiss, pitch: variable}
+    - {name: "Arial Nova Cond Light", charset: "00", family: swiss, pitch: variable, note: "data da capa (tema do slide); WAVE1 §I"}
+
+# ------------------------------------------------------------------------- docDefaults
+doc_defaults:
+  provenance: "nº 14 word/styles.xml w:docDefaults"
+  confidence: CONFIRMED
+  rPr:
+    rFonts: {asciiTheme: minorHAnsi, eastAsiaTheme: minorHAnsi, hAnsiTheme: minorHAnsi, cstheme: minorBidi}
+    sz: 22                              # 11 pt — corpo = Arial Nova Light 11 (revisão H)
+    szCs: 22
+    lang: {val: pt-BR, eastAsia: en-US, bidi: ar-SA}
+  pPr:
+    spacing: {after: 160, line: 259, lineRule: auto}
+
+# ------------------------------------------------------------------------------ estilos
+# Mesmos styleId do nº 14 (25 estilos com herança). Removidos: w:rsid. latentStyles não é
+# reproduzido (o nº 14 tem defLockedState=1, bloqueio de estilos latentes sem efeito visual).
+styles:
+  provenance: "nº 14 word/styles.xml (25 estilos), extraídos por tmp/agent_I/extract_ooxml_base.py"
+  confidence: CONFIRMED
+  definitions:
+    Fontepargpadro: {type: character, default: true, name: Default Paragraph Font, uiPriority: 1, semiHidden: true, unhideWhenUsed: true}
+    Semlista: {type: numbering, default: true, name: No List, uiPriority: 99, semiHidden: true, unhideWhenUsed: true}
+    Tabelanormal:
+      type: table
+      default: true
+      name: Normal Table
+      uiPriority: 99
+      semiHidden: true
+      unhideWhenUsed: true
+      tblPr:
+        tblInd: {w: 0, type: dxa}
+        tblCellMar:
+          top: {w: 0, type: dxa}
+          left: {w: 108, type: dxa}
+          bottom: {w: 0, type: dxa}
+          right: {w: 108, type: dxa}
+    Normal:
+      type: paragraph
+      default: true
+      name: Normal
+      uiPriority: 11
+      qFormat: true
+      pPr:
+        spacing: {after: 120, line: 288, lineRule: auto}
+        jc: both
+    CabealhoChar:
+      type: character
+      customStyle: true
+      name: Cabeçalho Char
+      basedOn: Fontepargpadro
+      link: Cabealho
+      uiPriority: 30
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, hAnsiTheme: majorHAnsi}
+        spacing: 20
+    Hyperlink:
+      type: character
+      name: Hyperlink
+      uiPriority: 99
+      locked: true
+      rPr:
+        color: {val: 1C5560, themeColor: accent1}
+        u: single
+    Nmerodepgina: {type: character, name: page number, basedOn: Fontepargpadro, uiPriority: 37, locked: true}
+    PargrafodaListaChar:
+      type: character
+      customStyle: true
+      name: Parágrafo da Lista Char
+      basedOn: Fontepargpadro
+      link: PargrafodaLista
+      uiPriority: 99
+      semiHidden: true
+      locked: true
+      rPr: {sz: 24}
+    RodapChar:
+      type: character
+      customStyle: true
+      name: Rodapé Char
+      basedOn: Fontepargpadro
+      link: Rodap
+      uiPriority: 31
+      rPr: {spacing: 20}
+    TtuloChar:
+      type: character
+      customStyle: true
+      name: Título Char
+      basedOn: Fontepargpadro
+      link: Ttulo
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        caps: true
+        color: {val: 266B91, themeColor: text2, themeShade: "80"}
+        kern: 28
+        sz: 26
+        szCs: 56
+    Ttulo1Char:
+      type: character
+      customStyle: true
+      name: Título 1 Char
+      basedOn: Fontepargpadro
+      link: Ttulo1
+      uiPriority: 3
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        caps: true
+        color: {val: 266B91, themeColor: text2, themeShade: "80"}
+        sz: 26
+        szCs: 32
+        lang: {eastAsia: pt-BR}
+    Ttulo2Char:
+      type: character
+      customStyle: true
+      name: Título 2 Char
+      basedOn: Fontepargpadro
+      link: Ttulo2
+      uiPriority: 5
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        color: {val: 439DCE, themeColor: text2, themeShade: BF}
+        sz: 26
+        szCs: 26
+        lang: {eastAsia: pt-BR}
+    Ttulo3Char:
+      type: character
+      customStyle: true
+      name: Título 3 Char
+      basedOn: Fontepargpadro
+      link: Ttulo3
+      uiPriority: 7
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        color: {val: 8CC3E1, themeColor: text2}
+        sz: 26
+        szCs: 24
+    Cabealho:
+      type: paragraph
+      name: header
+      basedOn: Normal
+      link: CabealhoChar
+      uiPriority: 30
+      locked: true
+      pPr:
+        tabs:
+          - {val: center, pos: 4252}
+          - {val: right, pos: 8504}
+        spacing: {after: 0, line: 240, lineRule: auto}
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, hAnsiTheme: majorHAnsi}   # cabeçalho = Arial Nova Cond
+        spacing: 20
+    Rodap:
+      type: paragraph
+      name: footer
+      basedOn: Normal
+      link: RodapChar
+      uiPriority: 31
+      locked: true
+      pPr:
+        tabs:
+          - {val: center, pos: 4252}
+          - {val: right, pos: 8504}
+        spacing: {after: 0, line: 240, lineRule: auto}
+      rPr: {spacing: 20}
+    SemEspaamento:
+      type: paragraph
+      name: No Spacing
+      uiPriority: 12
+      qFormat: true
+      locked: true
+      pPr:
+        spacing: {after: 0, line: 240, lineRule: auto}
+    PargrafodaLista:
+      type: paragraph
+      name: List Paragraph
+      basedOn: Normal
+      link: PargrafodaListaChar
+      uiPriority: 99
+      semiHidden: true
+      qFormat: true
+      locked: true
+      pPr:
+        ind: {left: 720}
+        contextualSpacing: true
+    CabealhodoSumrio:
+      type: paragraph
+      name: TOC Heading
+      aliases: Sumário
+      basedOn: Normal
+      next: Normal
+      uiPriority: 39
+      locked: true
+      pPr:
+        spacing: {after: 240, line: 240, lineRule: auto}
+        contextualSpacing: true
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        caps: true
+        color: {val: 439DCE, themeColor: text2, themeShade: BF}
+        sz: 26
+        szCs: 32
+        lang: {eastAsia: pt-BR}
+    Sumrio1:
+      type: paragraph
+      name: toc 1
+      basedOn: Normal
+      next: Normal
+      autoRedefine: true
+      uiPriority: 39
+      locked: true
+      pPr:
+        tabs:
+          - {val: left, pos: 182}
+          - {val: right, leader: dot, pos: 9911}
+        spacing: {after: 100}
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, hAnsiTheme: majorHAnsi}
+        caps: true
+        noProof: true
+        color: {val: "454545", themeColor: text1, themeTint: BF}
+    Sumrio2:
+      type: paragraph
+      name: toc 2
+      basedOn: Normal
+      next: Normal
+      autoRedefine: true
+      uiPriority: 39
+      locked: true
+      pPr:
+        tabs:
+          - {val: left, pos: 644}
+          - {val: right, leader: dot, pos: 9911}
+        spacing: {after: 100}
+        ind: {left: 210}
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, hAnsiTheme: majorHAnsi}
+        noProof: true
+        color: {val: "838383", themeColor: text1, themeTint: "80"}
+    Sumrio3:
+      type: paragraph
+      name: toc 3
+      basedOn: Normal
+      next: Normal
+      autoRedefine: true
+      uiPriority: 39
+      locked: true
+      pPr:
+        tabs:
+          - {val: left, pos: 1344}
+          - {val: right, leader: dot, pos: 9911}
+        spacing: {after: 100}
+        ind: {left: 700}
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, hAnsiTheme: majorHAnsi}
+        color: {val: "838383", themeColor: text1, themeTint: "80"}
+    Ttulo:
+      type: paragraph
+      name: Title
+      basedOn: Normal
+      next: Normal
+      link: TtuloChar
+      qFormat: true
+      locked: true
+      pPr:
+        pageBreakBefore: true
+        spacing: {line: 240, lineRule: auto}
+        jc: left
+        outlineLvl: 0
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        caps: true
+        color: {val: 266B91, themeColor: text2, themeShade: "80"}
+        kern: 28
+        sz: 26
+        szCs: 56
+    Ttulo1:
+      type: paragraph
+      name: heading 1
+      basedOn: Normal
+      next: Normal
+      link: Ttulo1Char
+      uiPriority: 3
+      qFormat: true
+      locked: true
+      pPr:
+        keepNext: true
+        keepLines: true
+        pageBreakBefore: true
+        numPr: {numId: 15}
+        spacing: {line: 240, lineRule: auto}
+        outlineLvl: 0
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        caps: true
+        color: {val: 266B91, themeColor: text2, themeShade: "80"}
+        sz: 26
+        szCs: 32
+        lang: {eastAsia: pt-BR}
+    Ttulo2:
+      type: paragraph
+      name: heading 2
+      basedOn: Normal
+      next: Normal
+      link: Ttulo2Char
+      uiPriority: 5
+      qFormat: true
+      locked: true
+      pPr:
+        keepNext: true
+        keepLines: true
+        numPr: {ilvl: 1, numId: 15}
+        spacing: {before: 360, line: 240, lineRule: auto}
+        outlineLvl: 1
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        color: {val: 439DCE, themeColor: text2, themeShade: BF}
+        sz: 26
+        szCs: 26
+        lang: {eastAsia: pt-BR}
+    Ttulo3:
+      type: paragraph
+      name: heading 3
+      basedOn: Normal
+      next: Normal
+      link: Ttulo3Char
+      uiPriority: 7
+      qFormat: true
+      locked: true
+      pPr:
+        keepNext: true
+        keepLines: true
+        numPr: {ilvl: 2, numId: 15}
+        spacing: {before: 360, line: 240, lineRule: auto}
+        jc: left
+        outlineLvl: 2
+      rPr:
+        rFonts: {asciiTheme: majorHAnsi, eastAsiaTheme: majorEastAsia, hAnsiTheme: majorHAnsi, cstheme: majorBidi}
+        b: true
+        color: {val: 8CC3E1, themeColor: text2}
+        sz: 26
+        szCs: 24
+
+# Nível do título (add_heading) -> styleId. Nível 0 = Título sem número (ENCERRAMENTO, ANEXOS).
+headings:
+  provenance: "nº 14 document.xml: Ttulo 2×, Ttulo1 2×, Ttulo2 6×, Ttulo3 12×"
+  confidence: CONFIRMED
+  levels: {0: Ttulo, 1: Ttulo1, 2: Ttulo2, 3: Ttulo3}
+
+# ---------------------------------------------------------------------------- numeração
+numbering:
+  provenance: "nº 14 word/numbering.xml: numId 15 -> abstractNum 23 (multilevel), ligado aos estilos Ttulo1..3"
+  confidence: CONFIRMED
+  headings:
+    num_id: 15                          # o mesmo valor citado pelo numPr dos estilos acima
+    abstract_num_id: 23
+    multi_level_type: multilevel
+    note: "o nº 14 define 9 níveis (Ttulo4..9 apontam para estilos inexistentes); o builder emite só os 3 usados"
+    levels:
+      - {ilvl: 0, start: 1, numFmt: decimal, lvlText: "%1", pStyle: Ttulo1, lvlJc: left, ind: {left: 432, hanging: 432}}
+      - {ilvl: 1, start: 1, numFmt: decimal, lvlText: "%1.%2", pStyle: Ttulo2, lvlJc: left, ind: {left: 576, hanging: 576}}
+      - {ilvl: 2, start: 1, numFmt: decimal, lvlText: "%1.%2.%3", pStyle: Ttulo3, lvlJc: left, ind: {left: 720, hanging: 720}}
+
+# ------------------------------------------------------------------------------- seções
+# PAGE_GEOMETRY + SECTION_SKELETON. Três seções, quebra nextPage.
+page:
+  provenance: "nº 14 sectPr de body[57], body[63] e body/w:sectPr"
+  confidence: CONFIRMED
+  sections:
+    - index: 0
+      orientation: portrait
+      pgSz: {w: 11906, h: 16838}
+      pgMar: {top: 1134, right: 849, bottom: 851, left: 1134, header: 567, footer: 0, gutter: 0}
+      cols_space: 708
+      doc_grid_line_pitch: 360
+      title_page: true                  # capa sem cabeçalho/rodapé (DEC-011 §3)
+      header_footer:
+        default: {header: portrait, footer: portrait_s0}
+        first: null                     # sem referência 'first' -> 1ª página vazia (WAVE1 §I)
+    - index: 1
+      orientation: landscape
+      pgSz: {w: 16838, h: 11906}
+      # retrato girado pelo Word (2,0/1,5/1,5/2,0 -> topo 2,0, dir 2,0, base 1,5, esq 1,5); revisão H
+      pgMar: {top: 1134, right: 1134, bottom: 849, left: 851, header: 567, footer: 0, gutter: 0}
+      cols_space: 708
+      doc_grid_line_pitch: 360
+      title_page: true                  # observado: a 1ª página paisagem usa cabeçalho/rodapé próprios
+      header_footer:
+        default: {header: landscape, footer: landscape}
+        first: {header: landscape_first, footer: landscape_first}
+      note: "o texto do cabeçalho fica recuado (~4,3 cm) nas páginas 2..n e alinhado à margem na 1ª; estável nº 11–14 (PDF)"
+    - index: 2
+      orientation: portrait
+      pgSz: {w: 11906, h: 16838}
+      pgMar: {top: 1134, right: 849, bottom: 851, left: 1134, header: 567, footer: 0, gutter: 0}
+      cols_space: 708
+      doc_grid_line_pitch: 360
+      title_page: false                 # o nº 14 referencia header5/footer5 'first' sem titlePg: inativos, não emitidos
+      header_footer:
+        default: {header: portrait, footer: portrait_s2}
+        first: null
+
+# ---------------------------------------------------------------------------- cabeçalho
+# HEADER. Tabela de 3 colunas, filete inferior nas células, texto na 1ª célula (estilo Cabealho),
+# seguida de parágrafo SemEspaamento. As larguras diferem por seção no nº 14 (anomalia herdada,
+# WAVE1 §I) e são reproduzidas como observadas, porque a posição do texto no PDF depende delas.
+header:
+  provenance: "nº 14 header1.xml (=header4.xml), header2.xml, header3.xml; posições conferidas nos PDFs nº 11–14"
+  confidence: CONFIRMED
+  text: "PROGRAMA | CONSÓRCIO ESTRUTURADOR DO PROGRAMA"
+  paragraph_style: Cabealho
+  trailing_paragraph_style: SemEspaamento
+  table:
+    jc: center
+    border_top: {val: single, sz: 4, space: 0, color: "838383", themeColor: text1, themeTint: "80"}
+    cell_margin_lr: 57
+    cell_borders: {top: {val: nil}, bottom: {val: single, sz: 4, space: 0, color: auto}}
+    row_height: 397
+    v_align: center
+    last_cell_jc: right
+    look: {val: "04A0", firstRow: 1, lastRow: 0, firstColumn: 1, lastColumn: 0, noHBand: 0, noVBand: 1}
+  layouts:
+    portrait: {width: 10118, grid: [7200, 140, 2778], source: header1.xml}
+    landscape_first: {width: 14884, grid: [7200, 140, 7544], source: header3.xml}
+    landscape: {width: 13183, grid: [8505, 140, 4538], text_ind: {left: 1567, right: -1082}, source: header2.xml}
+
+# ------------------------------------------------------------------------------- rodapé
+# FOOTER. Tabela de 2 colunas com filete superior; "-CONFIDENCIAL-" à esquerda, campo PAGE à direita.
+footer:
+  provenance: "nº 14 footer1.xml, footer2.xml, footer3.xml, footer4.xml; posições conferidas nos PDFs nº 11–14"
+  confidence: CONFIRMED
+  text: "-CONFIDENCIAL-"
+  leading_ptabs: 2                      # dois w:ptab (margin/left) antes do texto, como observado
+  page_field: " PAGE  \\* Arabic  \\* MERGEFORMAT "
+  page_placeholder: "1"
+  paragraph_style: Rodap
+  page_run_style: Nmerodepgina
+  trailing_paragraph_style: SemEspaamento
+  table:
+    border_top: {val: single, sz: 4, space: 0, color: "838383", themeColor: text1, themeTint: "80"}
+    cell_margin_lr: 57
+    cell_borders: {top: {val: single, sz: 4, space: 0, color: auto}}
+    v_align: center
+    look: {val: "04A0", firstRow: 1, lastRow: 0, firstColumn: 1, lastColumn: 0, noHBand: 0, noVBand: 1}
+  layouts:
+    portrait_s0: {width: 9782, grid: [6519, 3263], row_height: 397, source: footer1.xml}
+    landscape: {width: 15290, grid: [10190, 5100], row_height: 264, source: footer2.xml}
+    landscape_first: {width: 15638, grid: [10422, 5216], row_height: 264, trailing_paragraph_style: Rodap, source: footer3.xml}
+    portrait_s2: {width: 9921, grid: [6519, 3402], row_height: 397, source: footer4.xml}
+
+# --------------------------------------------------------------------------------- TOC
+toc:
+  provenance: "nº 14 body[2]: w:sdt docPartGallery 'Table of Contents', título em CabealhodoSumrio"
+  confidence: CONFIRMED
+  instruction: 'TOC \o "1-3" \z \u \h'
+  title: "Sumário"
+  title_style: CabealhodoSumrio
+  entry_style: Sumrio1
+  placeholder: "Atualize o campo (F9) para gerar o sumário."
+  sdt_id: 951067302
+  sdt_rPr:
+    rFonts: {eastAsiaTheme: minorEastAsia, cstheme: minorBidi}
+    b: 0
+    noProof: true
+    color: {val: "454545", themeColor: text1, themeTint: BF}
+    sz: 22
+    szCs: 22
+    lang: {eastAsia: en-US}
+
+# ----------------------------------------------------------------------- propriedades
+document_properties:
+  provenance: "builder (não é fato do nº 14)"
+  confidence: HIGH
+  author: "Programa"
+  language: pt-BR
+
+# -------------------------------------------------------------------------------- capa
+# COVER (DEC-011, opção b'): fundo sem texto composto uma vez das mídias do slide e ancorado atrás
+# do texto com sangria; textos do Word em quadros (w:framePr) com posição absoluta na página.
+cover:
+  provenance: "assets cover_slide_template (ppt/slides/slide1.xml sp 40/41/42, slideLayout1 '2_Slide de título'); tmp/agent_I/cover_ooxml.yaml"
+  confidence: HIGH
+  slide_size_emu: [6858000, 9906000]    # p:sldSz type=A4 do PowerPoint (19,05 x 27,517 cm) ≠ A4 ISO
+  # O histórico estica o slide até a página inteira (anisotrópico: x 1,1024, y 1,0793; medido no PDF
+  # nº 12: logos e textos em x' = 0,07 + 1,097·x, y' = 0,09 + 1,075·y cm). O builder usa o mesmo
+  # mapeamento slide -> página para fundo e textos; a sangria não muda a escala: o fundo é
+  # estendido (bordas replicadas) bleed_twips além de cada borda e ancorado em (-bleed, -bleed).
+  bleed_twips: 57                       # ~0,1 cm; o histórico transborda 0,3–0,4 cm (acidental)
+  font_scale: vertical                  # tamanho do slide × escala vertical, arredondado a meio-ponto
+  char_scale_from_aspect: true          # w:w = escala x / escala y (texto alargado como na prévia)
+  line_height_factor: 1.15              # altura de linha / corpo da fonte (Arial Nova), para centrar a data
+  background:
+    asset_id: cover_background_composite
+    file: cover_background_composite.png
+    dpi: 200
+    layers:
+      - {kind: photo, asset_id: cover_photo_background, file: cover_photo_background.jpeg,
+         src_rect: {l: 14342, t: -863, r: 47361, b: 17886}, pos: [-145775, -105280], size: [7003775, 10116562],
+         source: "slideLayout1 'Picture 3'"}
+      - {kind: rect, color: 1C5560, alpha: 0.71, pos: [-145775, -2], size: [7003775, 10011281],
+         source: "slideLayout1 'Rectangle 49' (accent1 alpha 71%)"}
+      - {kind: hline, color: FFFFFF, x: 1016552, y: 6798201, length: 5205600, width: 38100, source: "slideLayout1 'Conector reto 25' (3 pt)"}
+      # 2º filete (QA2-D c, builder MM): o slideLayout1 diz 1 pt ('Conector reto 26', w=12700; o
+      # slide1 não tem conector próprio), mas a prévia publicada desenha os dois filetes quase
+      # iguais nos 4 meses (traço vetorial no PDF, 1º/2º: nº 11 3,26/2,95 pt; nº 12 3,26/2,95;
+      # nº 13 3,72/3,72; nº 14 4,82/4,82). Com 1 pt o gerado saía com 0,5 mm contra 1,0–1,7 mm.
+      # Regra: mesma espessura do 1º filete (3 pt). MEDIUM (espessura absoluta varia por mês).
+      - {kind: hline, color: FFFFFF, x: 1016552, y: 8170545, length: 5205600, width: 38100, source: "slideLayout1 'Conector reto 26' (posição); espessura = 1º filete pela prévia publicada nº 11–14"}
+      - {kind: svg, asset_id: cover_logo_prog, file: cover_logo_prog.svg, pos: [1040669, 983324], size: [2855527, 1530798], source: "slide1 'Gráfico 2'"}
+      - {kind: svg, asset_id: cover_logos_partners, file: cover_logos_partners.svg, pos: [1040669, 3345983], size: [1887636, 3214034], source: "slide1 'Gráfico 3'"}
+  texts:
+    - id: title
+      kind: fixed
+      lines: ["RELATÓRIO PROGRAMA", "Grupo 2 - Gestão de Engenharia e Socioambiental"]
+      font: "Arial Nova Cond"
+      size_pt: 18
+      # QA2-D (c): a escala vertical do slide dava 19,5 pt (19,7 no PDF) contra 20,66 no nº 14;
+      # prévia publicada: nº 11 20,2/20,7, nº 12 20,24, nº 13 19,16, nº 14 20,66 pt. Tamanho na
+      # página = 20,5 pt (meio-ponto do nº 14; ±0,3 pt de nº 11, 12 e 14). MEDIUM.
+      page_size_pt: 20.5
+      bold: true
+      line_spacing_pct: 120
+      box_off: [1016552, 6798201]
+      box_ext: [5205600, 699404]
+      insets: {l: 72000, t: 108000, r: 72000, b: 36000}
+      anchor: top
+      source: "slide1 sp id=40 (ph title; lnSpc 120% do layout; titleStyle bold +mj)"
+    - id: report_number
+      kind: field
+      template: "Relatório Mensal N° {report_number}"   # 'N' + U+00B0 + espaço
+      font: "Arial Nova Cond"
+      size_pt: 16
+      # QA2-D (c): 17,5 pt pela escala do slide (17,6 no PDF) contra 16,53 no nº 14; prévia
+      # publicada: nº 11 17,67, nº 12 17,71, nº 13 15,96, nº 14 16,53 pt (mudou no nº 13; os dois
+      # meses mais recentes 16–16,5). Tamanho na página = 16,5 pt (nº 14). MEDIUM.
+      page_size_pt: 16.5
+      bold: false
+      line_spacing_pct: 100
+      box_off: [1016552, 8170545]
+      box_ext: [5205600, 367005]
+      insets: {l: 72000, t: 108000, r: 72000, b: 36000}
+      anchor: top
+      source: "slide1 sp id=41 (ph body idx=18, +mj)"
+    - id: issue_date
+      kind: field
+      template: "{day:02d} de {month_name} de {year}"   # mês por prog_g2_report.report_id.MONTH_NAMES
+      font: "Arial Nova Cond Light"
+      size_pt: 14
+      bold: false
+      line_spacing_pct: 100
+      box_off: [1016552, 9100207]
+      box_ext: [5205600, 266602]
+      insets: {l: 72000, t: 36000, r: 72000, b: 36000}
+      anchor: center
+      source: "slide1 sp id=42 (ph body idx=19, tema minor do slide = Arial Nova Cond Light)"
+  color: FFFFFF
+  page_break_after: true                # body[1] do nº 14: parágrafo só com w:br type=page

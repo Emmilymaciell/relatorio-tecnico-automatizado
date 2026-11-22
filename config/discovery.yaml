@@ -1,0 +1,40 @@
+# Parametros da fase de descoberta. Nao contem segredo nem ID descoberto.
+
+inventory:
+  # Metadados primeiro. Download so com autorizacao explicita e registrada.
+  select_fields:
+    - id
+    - name
+    - size
+    - file
+    - folder
+    - parentReference
+    - eTag
+    - cTag
+    - webUrl
+    - createdDateTime
+    - lastModifiedDateTime
+  page_size: 200
+  max_depth_default: 4
+  # Pausa minima entre chamadas para nao levar 429.
+  min_pause_seconds: 0.15
+
+download_policy:
+  # Toda transferencia de conteudo para disco exige autorizacao da usuaria,
+  # registrada em state/download_authorizations.jsonl antes de acontecer.
+  requires_explicit_authorization: true
+  temp_dir: tmp/downloads
+  delete_after_analysis_default: true
+  # Leitura por streaming em memoria (sem persistir) e aceitavel sem autorizacao.
+  in_memory_read_allowed: true
+
+report_identity:
+  # O parser canonico do numero e do mes de referencia vive em
+  # src/prog_g2_report/report_id.py (com testes). Nao duplicar regex aqui.
+  module: prog_g2_report.report_id
+  fields: [report_number, reference_month]
+
+master_list:
+  # Lista Mestra: localizar, nao presumir.
+  name_hints: ["Lista Mestra", "ListaMestra", "Lista_Mestra"]
+  status: NOT_LOCATED

@@ -1,0 +1,38 @@
+# Entradas humanas do Relatório G2 — EXEMPLO SINTÉTICO (nenhum dado real).
+#
+# O arquivo real de cada relatório fica FORA do Git (ex.: tmp/golden_inputs_14.yaml, gitignored),
+# porque traz dado pessoal (nome do signatário). Uso:
+#   .venv\Scripts\python scripts/17_generate_report.py ... --inputs tmp/golden_inputs_14.yaml
+#
+# Chaves (config/g2_report_model.yaml: inputs, salvo indicação):
+#   issue_date                   COVER: data da capa (obrigatória; --issue-date prevalece)
+#   signatory_name               SIGNATURE_TABLE ("Eng° {signatory_name}"; obrigatório)
+#   signature_date               SIGNATURE_DATE (obrigatória; --signature-date prevalece)
+#   environmental_reference_date data de referência do status ambiental ("Atualizado em" do painel)
+#   p22_status_reference_date    config/data_rules/p22_highway_block.yaml inputs.status_reference_date
+#   meetings_agenda              P2.1_MEETINGS_AGENDA: rodovia, executora, dia da semana, hora
+#   ai_review                    textos AI_SYNTHESIS APROVADOS na revisão humana (DEC-013), por slot
+#   p22_external_status          P2.2_EXTERNAL_STATUS (desapropriação e interferências; GAP-009)
+issue_date: 2027-01-11
+signatory_name: "Fulano de Tal"
+signature_date: 2027-01-12
+environmental_reference_date: 2027-01-08
+p22_status_reference_date: 2027-01-08
+meetings_agenda:
+  - {highway: RD-001, executora: "Consórcio Exemplo", weekday: quintas, hour: "10h"}
+  - {highway: RD-002, executora: "Construtora Exemplo", weekday: segundas, hour: "14h"}
+ai_review:
+  P2.1_SUMMARY_S4_TEMAS: "tema sintético de exemplo"
+# p22_external_status (P2.2_EXTERNAL_STATUS): rodovia -> matriz -> campo; valores sem pontuação
+# final (o renderizador põe ';' e '.'). Campo sem status: nunca '' (vira PENDING_HUMAN com
+# marcador); declarar {null_reason: "<motivo>"} -> texto padronizado de schema.no_information.
+# `prog` (Análise PROGRAMA) NÃO se informa: sai da aba Projetos (schema.derived.prog).
+# Formato em config/g2_report_model.yaml: inputs.p22_external_status.schema.
+p22_external_status:
+  RD-101:
+    dup: {gdp: "Status sintético dois",
+          casa_civil: {null_reason: "motivo sintético declarado na revisão"}}
+    interferences: {gfd: "Status sintético quatro",
+                    utility: "Status sintético cinco", started: "Status sintético seis"}
+  RD-103:
+    dup: {gdp: "Status sintético oito", casa_civil: "Status sintético nove"}
